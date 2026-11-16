@@ -60,7 +60,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 ### Etapa 2 — Engine: cartas y envido
 
-- [ ] Tipos `Suit`, `Card`, mazo de 40 cartas, RNG con semilla, mezclar y repartir (`feat(engine): mazo y reparto`)
+- [x] Tipos `Suit`, `Card`, mazo de 40 cartas, RNG con semilla, mezclar y repartir (`feat(engine): mazo y reparto`)
 - [ ] Jerarquía de truco y `compareCards` (`feat(engine): jerarquia de cartas`)
 - [ ] `calculateEnvido(hand)` (`feat(engine): calculo de envido`)
 - [ ] Tests exhaustivos de jerarquía y envido (todas las combinaciones relevantes)
@@ -146,3 +146,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 1 · Vitest 5 + Testing Library; entorno `node` por defecto, UI con `// @vitest-environment jsdom`; 2 tests de humo · `test: configura vitest`
 - 2026-11-16 · Etapa 1 · Capas `src/{engine,ai,persistence,store,ui}` + `theme.css` con la paleta; reglas de capas verificadas con imports prohibidos de prueba (9/9 detectados) · `chore: estructura de capas`
 - 2026-11-16 · Etapa 1 · `README.md` con comandos, capas y guía de continuación; cierre de etapa con tag `etapa-1` · `docs: readme`
+- 2026-11-16 · Etapa 2 · Tipos `Suit`/`Card`, mazo de 40 cartas, RNG Mulberry32 con semilla, `shuffleDeck` y `dealHands` con tests · `feat(engine): mazo y reparto`
