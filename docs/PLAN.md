@@ -113,13 +113,13 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Pantallas historial y estadísticas (`feat(ui): historial y estadisticas`)
 - Hecho cuando: se puede jugar una partida completa de punta a punta. Tag `etapa-7`.
 
-### Etapa 8 — Estética de campo
+### Etapa 8 — Estética de campo ✅
 
 - [x] Paleta, tipografías, fondo de mesa de madera/pampa (`style(ui): tema campero`)
 - [x] 40 cartas españolas en SVG (componente generado) + dorso (`feat(ui): cartas svg`)
 - [x] Avatares de los 3 personajes (`feat(ui): personajes`)
 - [x] Anotador con palitos/fósforos (grupos de 5, malas/buenas) (`feat(ui): anotador de palitos`)
-- [ ] Responsive móvil vertical primero (`style(ui): responsive`)
+- [x] Responsive móvil vertical primero (`style(ui): responsive`)
 - Tag `etapa-8`. **Punto de control con el usuario: aprobación visual.**
 
 ### Etapa 9 — Animaciones, sonido y frases
@@ -181,3 +181,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 8 · Componente `<SpanishCard />` con las 40 cartas españolas en SVG, pintas reglamentarias (0/1/2/3), figuras 10/11/12 y dorso con guarda pampa · `feat(ui): cartas svg`
 - 2026-11-16 · Etapa 8 · Retratos SVG de los 3 personajes (`GauchoAvatar.tsx`: El Pibe, Don Ramón y El Viejo Vizcacha) en mesa y selector · `feat(ui): personajes`
 - 2026-11-16 · Etapa 8 · Anotador de palitos/fósforos en SVG (`MatchstickScoreboard.tsx`) con grupos de 5 y separación malas/buenas · `feat(ui): anotador de palitos`
+- 2026-11-16 · Etapa 8 · Ajustes responsive móvil vertical primero (360×640) y tests de componentes visuales; cierre con tag `etapa-8` · `style(ui): responsive`

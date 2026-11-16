@@ -3,6 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useGameStore } from '../store/index.ts';
 import App from './App.tsx';
+import { SpanishCard } from './cards/SpanishCard.tsx';
+import { GauchoAvatar } from './components/GauchoAvatar.tsx';
+import { MatchstickScoreboard } from './components/MatchstickScoreboard.tsx';
 
 describe('App — Flujo completo de UI funcional (Etapa 7)', () => {
   beforeEach(() => {
@@ -73,5 +76,44 @@ describe('App — Flujo completo de UI funcional (Etapa 7)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
     fireEvent.click(screen.getByRole('button', { name: 'Historial' }));
     expect(screen.getByText(/Abandonada \(Derrota\)/i)).toBeInTheDocument();
+  });
+
+  it('renderiza SpanishCard (pintas 0..3, figuras y dorso), GauchoAvatar y MatchstickScoreboard (Etapa 8)', () => {
+    const { container } = render(
+      <div>
+        <SpanishCard suit="oro" number={1} />
+        <SpanishCard suit="copa" number={10} />
+        <SpanishCard suit="espada" number={11} />
+        <SpanishCard suit="basto" number={12} />
+        <SpanishCard faceDown />
+        <GauchoAvatar difficulty="facil" />
+        <GauchoAvatar difficulty="medio" />
+        <GauchoAvatar difficulty="dificil" />
+        <MatchstickScoreboard
+          humanScore={18}
+          botScore={12}
+          targetScore={30}
+          rivalName="Don Ramón"
+        />
+      </div>,
+    );
+
+    expect(screen.getByRole('img', { name: '1 de oro' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '10 de copa' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '11 de espada' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: '12 de basto' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Carta boca abajo')).toBeInTheDocument();
+
+    expect(container.querySelector('[data-pintas="0"]')).not.toBeNull();
+    expect(container.querySelector('[data-pintas="1"]')).not.toBeNull();
+    expect(container.querySelector('[data-pintas="2"]')).not.toBeNull();
+    expect(container.querySelector('[data-pintas="3"]')).not.toBeNull();
+
+    expect(screen.getByRole('img', { name: 'Avatar de El Pibe' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Avatar de Don Ramón' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Avatar de El Viejo Vizcacha' })).toBeInTheDocument();
+
+    expect(screen.getByText('3 buenas (18)')).toBeInTheDocument();
+    expect(screen.getByText('12 malas')).toBeInTheDocument();
   });
 });

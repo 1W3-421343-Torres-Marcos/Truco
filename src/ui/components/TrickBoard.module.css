@@ -1,9 +1,15 @@
 .board {
   width: 100%;
-  max-width: 560px;
+  max-width: 580px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.55rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .board {
+    gap: 0.75rem;
+  }
 }
 
 .trickColumn {
