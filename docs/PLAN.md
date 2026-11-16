@@ -46,9 +46,9 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Crear `AGENTS.md`, skills y `docs/PLAN.md` (`docs: plan inicial, reglas y skills`)
 
 ### Etapa 1 — Entorno y esqueleto
-> Requisito: Node.js LTS (≥ 20) instalado en la máquina. Hoy **no está instalado**.
-- [ ] Instalar Node.js LTS y verificar `node -v`, `npm -v`
-- [ ] Scaffold Vite React-TS en la raíz (`chore: scaffold vite react-ts`)
+> Requisito: Node.js LTS (≥ 20). Instalado v26.13.1 / npm 11.20.0 vía `winget install OpenJS.NodeJS.LTS`.
+- [x] Instalar Node.js LTS y verificar `node -v`, `npm -v`
+- [x] Scaffold Vite React-TS en la raíz (`chore: scaffold vite react-ts`)
 - [ ] ESLint + Prettier + `tsconfig` strict (`chore: lint y formato`)
 - [ ] Vitest + Testing Library + test de humo (`test: configura vitest`)
 - [ ] Estructura de carpetas `src/{engine,ai,persistence,store,ui}` y scripts `lint/test/build` (`chore: estructura de capas`)
@@ -127,3 +127,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 ## 4. Registro de progreso
 <!-- Una línea por tarea terminada: fecha · etapa · tarea · commit -->
 - 2026-11-16 · Etapa 0 · Decisiones, AGENTS.md, skills y plan · `docs: plan inicial, reglas y skills`
+- 2026-11-16 · Etapa 1 · Node.js LTS 26 instalado + scaffold Vite 8 / React 18 / TS (manual, sin create-vite) · `chore: scaffold vite react-ts`
