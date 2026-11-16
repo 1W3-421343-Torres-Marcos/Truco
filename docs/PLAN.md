@@ -115,7 +115,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 ### Etapa 8 — Estética de campo
 
-- [ ] Paleta, tipografías, fondo de mesa de madera/pampa (`style(ui): tema campero`)
+- [x] Paleta, tipografías, fondo de mesa de madera/pampa (`style(ui): tema campero`)
 - [ ] 40 cartas españolas en SVG (componente generado) + dorso (`feat(ui): cartas svg`)
 - [ ] Avatares de los 3 personajes (`feat(ui): personajes`)
 - [ ] Anotador con palitos/fósforos (grupos de 5, malas/buenas) (`feat(ui): anotador de palitos`)
@@ -177,3 +177,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 7 · Tablero de 3 bazas siempre visibles (`TrickBoard.tsx`) con cartas jugadas por baza y estado · `feat(ui): bazas visibles`
 - 2026-11-16 · Etapa 7 · Modal/resumen de fin de mano y fin de partida (`HandSummaryModal.tsx`) con tantos de envido y desglose de puntos · `feat(ui): resumen de mano`
 - 2026-11-16 · Etapa 7 · Pantallas de Historial (`HistoryScreen.tsx`), Estadísticas (`StatsScreen.tsx`) y Reglas (`RulesScreen.tsx`) + tests de integración de UI; cierre con tag `etapa-7` · `feat(ui): historial y estadisticas`
+- 2026-11-16 · Etapa 8 · Tema campero (`theme.css`) con texturas de mesa de madera, horizonte pampeano y tipografías criollas · `style(ui): tema campero`

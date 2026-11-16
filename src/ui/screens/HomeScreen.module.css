@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem 1rem;
-  background: linear-gradient(180deg, var(--pampa) 0%, var(--pampa-verde) 100%);
+  background: var(--pampa-fondo);
   color: var(--tinta);
 }
 

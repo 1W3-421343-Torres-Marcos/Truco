@@ -1,12 +1,60 @@
-/* Paleta de campo argentino (skill `ui-estetica`). Estilos reales desde la Etapa 8. */
+/* Paleta y estética de campo argentino (skill `ui-estetica`) */
 :root {
   --madera-oscura: #5b3a1e;
   --madera: #8b5a2b;
+  --madera-clara: #a66f38;
   --pampa: #c9b77a;
   --pampa-verde: #87a96b;
   --cuero: #a0703c;
   --crema: #f4ead5;
+  --crema-oscura: #e5d4b3;
   --celeste: #6cace4;
   --rojo-punzo: #b22222;
   --tinta: #2b1d0e;
+  --oro-naipe: #d49b27;
+
+  --font-display: 'Rye', 'Sancreek', 'Rockwell', 'Georgia', serif;
+  --font-body: 'Lora', 'Georgia', 'Cambria', serif;
+
+  --mesa-textura:
+    repeating-linear-gradient(
+      90deg,
+      rgba(43, 29, 14, 0.08) 0px,
+      rgba(43, 29, 14, 0.08) 2px,
+      transparent 2px,
+      transparent 18px
+    ),
+    radial-gradient(ellipse at center, #9c6733 0%, var(--madera) 60%, #6d431d 100%);
+
+  --pampa-fondo:
+    radial-gradient(circle at 50% 15%, rgba(255, 236, 179, 0.45) 0%, transparent 55%),
+    linear-gradient(180deg, var(--pampa) 0%, #b5ab6e 48%, var(--pampa-verde) 100%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  background: var(--madera-oscura);
+  color: var(--tinta);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+button {
+  font-family: inherit;
 }
