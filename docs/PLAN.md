@@ -89,7 +89,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 - [x] Interfaz `Bot` (`decide(view) => Action`), vista con información oculta (`feat(ai): interfaz de bot`)
 - [x] Fácil — "El Pibe" (`feat(ai): bot facil`)
-- [ ] Medio — "Don Ramón" (`feat(ai): bot medio`)
+- [x] Medio — "Don Ramón" (`feat(ai): bot medio`)
 - [ ] Difícil — "El Viejo Vizcacha" (Monte Carlo + mentiras + modelo del rival) (`feat(ai): bot dificil`)
 - [ ] Torneo automático: Difícil > Medio > Fácil en ≥ 1000 partidas (`test(ai): torneo entre bots`)
 - Tag `etapa-5`.
@@ -163,3 +163,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 4 · Simulación masiva de 10 000 manos aleatorias (a 15 y a 30 puntos) sin errores ni puntajes inválidos; cierre con tag `etapa-4` · `test(engine): simulacion masiva`
 - 2026-11-16 · Etapa 5 · Interfaz `Bot`, `PlayerView` sin información oculta, `handStrength`, `OpponentProfile` y personajes con frases criollas · `feat(ai): interfaz de bot`
 - 2026-11-16 · Etapa 5 · Bot Fácil ("El Pibe") en `src/ai/bot-facil.ts` con tests · `feat(ai): bot facil`
+- 2026-11-16 · Etapa 5 · Bot Medio ("Don Ramón") con heurísticas clásicas de carta, envido en malas/buenas y ~10 % de mentira · `feat(ai): bot medio`
