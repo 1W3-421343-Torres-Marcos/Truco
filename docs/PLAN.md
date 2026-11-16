@@ -104,7 +104,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 ### Etapa 7 — UI funcional (sin estética final)
 
-- [ ] Store Zustand conectando engine + ai + persistence (`feat(store): store de partida`)
+- [x] Store Zustand conectando engine + ai + persistence (`feat(store): store de partida`)
 - [ ] Pantalla inicio: Nueva partida / Continuar / Historial / Estadísticas / Reglas (`feat(ui): pantalla inicio`)
 - [ ] Nueva partida: dificultad + 15/30 (`feat(ui): configuracion de partida`)
 - [ ] Mesa jugable: mano propia, botones de canto, turnos de la máquina (`feat(ui): mesa jugable`)
@@ -170,3 +170,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 6 · Historial de partidas (`loadHistory`, `appendGameRecord`, `createGameRecordFromSavedGame`, tope 500) · `feat(persistence): historial`
 - 2026-11-16 · Etapa 6 · Estadísticas (`Stats`, `accumulateHandCounters`, `finishAndPersistGame`) y configuración (`Settings`) · `feat(persistence): estadisticas y config`
 - 2026-11-16 · Etapa 6 · Versionado (`CURRENT_SCHEMA_VERSION`), `migrateSavedGamePayload`, `migrateHistoryRecordPayload` y tests de datos corruptos/migraciones; cierre con tag `etapa-6` · `feat(persistence): versionado`
+- 2026-11-16 · Etapa 7 · Store Zustand (`createTrucoStore`, `useGameStore`, `hasResumableGame`) conectando engine + ai + persistence · `feat(store): store de partida`

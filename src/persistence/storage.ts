@@ -27,8 +27,13 @@ const fallbackMemoryStorage = createMemoryStorage();
  */
 export function getDefaultStorage(): StorageAdapter {
   try {
-    if (typeof globalThis.localStorage !== 'undefined' && globalThis.localStorage !== null) {
-      return globalThis.localStorage;
+    if (
+      typeof window !== 'undefined' &&
+      typeof window.localStorage !== 'undefined' &&
+      window.localStorage !== null &&
+      typeof window.localStorage.getItem === 'function'
+    ) {
+      return window.localStorage;
     }
   } catch {
     // Entornos con localStorage restringido (modo privado estricto / iframe)
