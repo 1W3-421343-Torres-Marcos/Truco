@@ -1,10 +1,14 @@
+import { useGameStore } from '../store/index.ts';
+import { HomeScreen } from './screens/HomeScreen.tsx';
+
 function App() {
-  return (
-    <main>
-      <h1>Truco</h1>
-      <p>En construcción</p>
-    </main>
-  );
+  const screen = useGameStore((s) => s.screen);
+
+  if (screen === 'home') {
+    return <HomeScreen />;
+  }
+
+  return <HomeScreen />;
 }
 
 export default App;

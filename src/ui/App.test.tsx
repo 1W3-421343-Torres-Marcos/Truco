@@ -4,8 +4,12 @@ import { describe, expect, it } from 'vitest';
 import App from './App.tsx';
 
 describe('App', () => {
-  it('muestra el título del juego', () => {
+  it('muestra la pantalla de inicio con los botones principales', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Truco' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Truco Argentino' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Historial' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Estadísticas' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reglas' })).toBeInTheDocument();
   });
 });
