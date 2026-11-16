@@ -13,6 +13,15 @@ import {
   createGameRecordFromSavedGame,
   loadHistory,
 } from './history.ts';
+import {
+  DEFAULT_SETTINGS,
+  accumulateHandCounters,
+  createInitialStats,
+  finishAndPersistGame,
+  loadSettings,
+  loadStats,
+  saveSettings,
+} from './stats-settings.ts';
 import { createMemoryStorage } from './storage.ts';
 import { STORAGE_KEYS, type GameRecord } from './types.ts';
 
@@ -104,5 +113,91 @@ describe('historial de partidas terminadas (Etapa 6.2)', () => {
 
     clearHistory(storage);
     expect(loadHistory(storage)).toEqual([]);
+  });
+});
+
+describe('estadísticas acumuladas y configuración (Etapa 6.3)', () => {
+  it('actualiza rachas, desglose por dificultad, contadores de envido/truco y borra current al finalizar', () => {
+    const storage = createMemoryStorage();
+    expect(loadStats(storage)).toEqual(createInitialStats());
+
+    let state = createGame({ targetScore: 15, seed: 33, firstMano: 'human' });
+    state = applyAction(state, { type: 'callEnvido', call: 'envido' });
+    state = applyAction(state, { type: 'respondEnvido', response: 'noQuiero' }); // human gana envido
+    state = applyAction(state, { type: 'callTruco', level: 'truco' });
+    state = applyAction(state, { type: 'respondTruco', response: 'noQuiero' }); // human gana truco
+
+    const counters = accumulateHandCounters(
+      { envidosPlayed: 0, envidosWon: 0, trucosPlayed: 0, trucosWon: 0 },
+      state.hand,
+    );
+    expect(counters).toEqual({
+      envidosPlayed: 1,
+      envidosWon: 1,
+      trucosPlayed: 1,
+      trucosWon: 1,
+    });
+
+    const savedWin1 = createSavedGame({
+      id: 'win-1',
+      startedAt: '2026-11-16T12:00:00.000Z',
+      difficulty: 'medio',
+      seed: 33,
+      state: { ...state, scores: { human: 15, bot: 7 }, winner: 'human' },
+      matchCounters: counters,
+    });
+    saveCurrentGame(savedWin1, storage);
+
+    const res1 = finishAndPersistGame(savedWin1, '2026-11-16T12:04:00.000Z', undefined, storage);
+    expect(loadCurrentGame(storage)).toBeNull();
+    expect(res1.stats.gamesPlayed).toBe(1);
+    expect(res1.stats.gamesWon).toBe(1);
+    expect(res1.stats.currentStreak).toBe(1);
+    expect(res1.stats.bestStreak).toBe(1);
+    expect(res1.stats.byDifficulty.medio).toEqual({ played: 1, won: 1 });
+    expect(res1.stats.envidosWon).toBe(1);
+    expect(res1.stats.trucosWon).toBe(1);
+
+    // Segunda victoria seguida -> racha 2
+    const savedWin2 = createSavedGame({
+      ...savedWin1,
+      id: 'win-2',
+      difficulty: 'dificil',
+    });
+    const res2 = finishAndPersistGame(savedWin2, '2026-11-16T12:08:00.000Z', undefined, storage);
+    expect(res2.stats.currentStreak).toBe(2);
+    expect(res2.stats.bestStreak).toBe(2);
+
+    // Abandono -> cuenta como derrota, corta currentStreak a 0 pero mantiene bestStreak en 2
+    const savedAbandoned = createSavedGame({
+      ...savedWin1,
+      id: 'abandoned-2',
+      difficulty: 'dificil',
+    });
+    const res3 = finishAndPersistGame(
+      savedAbandoned,
+      '2026-11-16T12:09:00.000Z',
+      { abandoned: true },
+      storage,
+    );
+    expect(res3.stats.gamesPlayed).toBe(3);
+    expect(res3.stats.gamesWon).toBe(2);
+    expect(res3.stats.currentStreak).toBe(0);
+    expect(res3.stats.bestStreak).toBe(2);
+    expect(res3.stats.byDifficulty.dificil).toEqual({ played: 2, won: 1 });
+  });
+
+  it('guarda y carga Settings con valores por defecto seguros', () => {
+    const storage = createMemoryStorage();
+    expect(loadSettings(storage)).toEqual(DEFAULT_SETTINGS);
+
+    const custom = {
+      soundEnabled: false,
+      voiceEnabled: true,
+      lastDifficulty: 'dificil' as const,
+      lastTarget: 15 as const,
+    };
+    expect(saveSettings(custom, storage)).toBe(true);
+    expect(loadSettings(storage)).toEqual(custom);
   });
 });

@@ -98,7 +98,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 - [x] Guardar/cargar partida en curso tras cada acción (`feat(persistence): partida en curso`)
 - [x] Historial de partidas terminadas (`feat(persistence): historial`)
-- [ ] Estadísticas acumuladas y configuración (`feat(persistence): estadisticas y config`)
+- [x] Estadísticas acumuladas y configuración (`feat(persistence): estadisticas y config`)
 - [ ] Versionado de esquema + migraciones + tolerancia a datos corruptos (`feat(persistence): versionado`)
 - Tag `etapa-6`.
 
@@ -168,3 +168,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 5 · Torneo automático de 3000 partidas (1000 por cruce: Medio > Fácil > 60 %, Difícil > Medio > 60 %, Difícil > Fácil > 75 %); cierre con tag `etapa-5` · `test(ai): torneo entre bots`
 - 2026-11-16 · Etapa 6 · `StorageAdapter`, `saveCurrentGame`, `loadCurrentGame` y `clearCurrentGame` en `src/persistence` · `feat(persistence): partida en curso`
 - 2026-11-16 · Etapa 6 · Historial de partidas (`loadHistory`, `appendGameRecord`, `createGameRecordFromSavedGame`, tope 500) · `feat(persistence): historial`
+- 2026-11-16 · Etapa 6 · Estadísticas (`Stats`, `accumulateHandCounters`, `finishAndPersistGame`) y configuración (`Settings`) · `feat(persistence): estadisticas y config`
