@@ -69,7 +69,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 ### Etapa 3 — Engine: flujo de la mano y truco
 
 - [x] Estado de partida/mano serializable, turnos, mano/pie (`feat(engine): estado de mano`)
-- [ ] Bazas, ganador de baza, reglas de parda completas (`feat(engine): bazas y pardas`)
+- [x] Bazas, ganador de baza, reglas de parda completas (`feat(engine): bazas y pardas`)
 - [ ] Truco / Retruco / Vale Cuatro con quién puede subir, quiero / no quiero (`feat(engine): cantos de truco`)
 - [ ] Irse al mazo con la regla decidida (`feat(engine): irse al mazo`)
 - [ ] `getLegalActions(state)` y `applyAction(state, action)` (`feat(engine): acciones legales`)
@@ -151,3 +151,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 2 · `getCardEnvidoValue`, `calculateEnvido`, `compareEnvido` y `hasEnvidoPair` en `src/engine/envido.ts` · `feat(engine): calculo de envido`
 - 2026-11-16 · Etapa 2 · Tests exhaustivos: 1600 comparaciones de jerarquía (40×40) y las 9880 manos posibles C(40,3) de envido; cobertura 100 % en `cards.ts`, `envido.ts` y `rng.ts`; cierre con tag `etapa-2` · `test(engine): tests exhaustivos de cartas y envido`
 - 2026-11-16 · Etapa 3 · Tipos `GameState`/`HandState`/`TrickState`/`TrucoState`, `createGame`, `startNextHand` y `getActivePlayer` · `feat(engine): estado de mano`
+- 2026-11-16 · Etapa 3 · `resolveTrickWinner`, `nextTrickLeadPlayer` y `resolveHandWinnerFromTricks` (las 6 reglas de parda) con tests · `feat(engine): bazas y pardas`
