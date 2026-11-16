@@ -48,6 +48,22 @@
   margin: 0 3px;
 }
 
+@keyframes matchPop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .groupSvg {
   display: block;
+}
+
+.groupSvg g {
+  transform-origin: center;
+  animation: matchPop 0.22s ease-out;
 }

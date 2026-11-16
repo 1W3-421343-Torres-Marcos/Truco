@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   BOT_CHARACTERS,
   cardId,
@@ -27,6 +28,7 @@ export function TableScreen() {
 
   const state = savedGame?.state ?? null;
   const activePlayer = state ? getActivePlayer(state.hand) : null;
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (!state || state.winner !== null || activePlayer !== 'bot') {
@@ -100,8 +102,19 @@ export function TableScreen() {
       </div>
 
       <section className={styles.botHandRow} aria-label="Cartas de la máquina">
-        {hand.remainingCards.bot.map((_, idx) => (
-          <SpanishCard key={`bot-card-${idx}`} faceDown size="sm" />
+        {hand.remainingCards.bot.map((botCard, idx) => (
+          <motion.div
+            key={`bot-card-${hand.handNumber}-${cardId(botCard)}`}
+            initial={reduceMotion ? false : { opacity: 0, y: -24, scale: 0.85 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.22, delay: reduceMotion ? 0 : idx * 0.08 }}
+          >
+            {hand.phase === 'handEnded' ? (
+              <SpanishCard suit={botCard.suit} number={botCard.number} size="sm" />
+            ) : (
+              <SpanishCard faceDown size="sm" />
+            )}
+          </motion.div>
         ))}
       </section>
 
@@ -128,17 +141,21 @@ export function TableScreen() {
 
       <section className={styles.myHandSection} aria-label="Tus cartas">
         <div className={styles.myCardsRow}>
-          {hand.remainingCards.human.map((card) => {
+          {hand.remainingCards.human.map((card, idx) => {
             const id = cardId(card);
             const playAction = isHumanTurn ? canPlayCard(id) : undefined;
             const label = formatCard(card);
             return (
-              <button
-                key={id}
+              <motion.button
+                key={`${hand.handNumber}-${id}`}
                 type="button"
                 aria-label={label}
                 disabled={!playAction}
                 className={styles.cardButton}
+                initial={reduceMotion ? false : { opacity: 0, y: 28, scale: 0.85 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.24, delay: reduceMotion ? 0 : idx * 0.08 }}
+                whileTap={playAction && !reduceMotion ? { scale: 0.94 } : undefined}
                 onClick={() => {
                   if (playAction) {
                     playHumanAction(playAction);
@@ -146,7 +163,7 @@ export function TableScreen() {
                 }}
               >
                 <SpanishCard suit={card.suit} number={card.number} size="md" />
-              </button>
+              </motion.button>
             );
           })}
         </div>

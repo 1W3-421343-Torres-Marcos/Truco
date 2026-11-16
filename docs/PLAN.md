@@ -124,7 +124,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 ### Etapa 9 — Animaciones, sonido y frases
 
-- [ ] Animación de reparto y de jugar carta (`feat(ui): animaciones`)
+- [x] Animación de reparto y de jugar carta (`feat(ui): animaciones`)
 - [ ] Globos de diálogo con frases por personaje (`feat(ui): globos de dialogo`)
 - [ ] Efectos de sonido + voz TTS opcional + botón silencio (`feat(ui): sonido y voz`)
 - Tag `etapa-9`.
@@ -182,3 +182,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 8 · Retratos SVG de los 3 personajes (`GauchoAvatar.tsx`: El Pibe, Don Ramón y El Viejo Vizcacha) en mesa y selector · `feat(ui): personajes`
 - 2026-11-16 · Etapa 8 · Anotador de palitos/fósforos en SVG (`MatchstickScoreboard.tsx`) con grupos de 5 y separación malas/buenas · `feat(ui): anotador de palitos`
 - 2026-11-16 · Etapa 8 · Ajustes responsive móvil vertical primero (360×640) y tests de componentes visuales; cierre con tag `etapa-8` · `style(ui): responsive`
+- 2026-11-16 · Etapa 9 · Animaciones con `motion` (reparto escalonado 80 ms, vuelo de carta a baza, volteo final de cartas del bot y fósforo nuevo) con soporte `prefers-reduced-motion` · `feat(ui): animaciones`

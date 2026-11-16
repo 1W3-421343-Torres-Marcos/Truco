@@ -1,4 +1,5 @@
-import { type TrickState } from '../../store/index.ts';
+import { motion, useReducedMotion } from 'motion/react';
+import { cardId, type TrickState } from '../../store/index.ts';
 import { SpanishCard } from '../cards/SpanishCard.tsx';
 import styles from './TrickBoard.module.css';
 
@@ -22,6 +23,8 @@ function getTrickStatusLabel(
 }
 
 export function TrickBoard({ tricks, currentTrickIndex, rivalName }: TrickBoardProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section className={styles.board} aria-label="Bazas de la mano">
       {tricks.map((trick, idx) => {
@@ -44,7 +47,14 @@ export function TrickBoard({ tricks, currentTrickIndex, rivalName }: TrickBoardP
             <div className={styles.slot}>
               <span className={styles.slotLabel}>{rivalName}</span>
               {botCard ? (
-                <SpanishCard suit={botCard.suit} number={botCard.number} size="sm" />
+                <motion.div
+                  key={`bot-${idx}-${cardId(botCard)}`}
+                  initial={reduceMotion ? false : { opacity: 0, scale: 0.72, y: -16 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  <SpanishCard suit={botCard.suit} number={botCard.number} size="sm" />
+                </motion.div>
               ) : (
                 <span className={styles.emptySlot}>—</span>
               )}
@@ -53,7 +63,14 @@ export function TrickBoard({ tricks, currentTrickIndex, rivalName }: TrickBoardP
             <div className={styles.slot}>
               <span className={styles.slotLabel}>Vos</span>
               {humanCard ? (
-                <SpanishCard suit={humanCard.suit} number={humanCard.number} size="sm" />
+                <motion.div
+                  key={`human-${idx}-${cardId(humanCard)}`}
+                  initial={reduceMotion ? false : { opacity: 0, scale: 0.72, y: 16 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  <SpanishCard suit={humanCard.suit} number={humanCard.number} size="sm" />
+                </motion.div>
               ) : (
                 <span className={styles.emptySlot}>—</span>
               )}
