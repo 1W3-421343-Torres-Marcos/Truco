@@ -1,4 +1,5 @@
-import { formatCard, type TrickState } from '../../store/index.ts';
+import { type TrickState } from '../../store/index.ts';
+import { SpanishCard } from '../cards/SpanishCard.tsx';
 import styles from './TrickBoard.module.css';
 
 export interface TrickBoardProps {
@@ -43,7 +44,7 @@ export function TrickBoard({ tricks, currentTrickIndex, rivalName }: TrickBoardP
             <div className={styles.slot}>
               <span className={styles.slotLabel}>{rivalName}</span>
               {botCard ? (
-                <span className={styles.playedCard}>{formatCard(botCard)}</span>
+                <SpanishCard suit={botCard.suit} number={botCard.number} size="sm" />
               ) : (
                 <span className={styles.emptySlot}>—</span>
               )}
@@ -52,7 +53,7 @@ export function TrickBoard({ tricks, currentTrickIndex, rivalName }: TrickBoardP
             <div className={styles.slot}>
               <span className={styles.slotLabel}>Vos</span>
               {humanCard ? (
-                <span className={styles.playedCard}>{formatCard(humanCard)}</span>
+                <SpanishCard suit={humanCard.suit} number={humanCard.number} size="sm" />
               ) : (
                 <span className={styles.emptySlot}>—</span>
               )}

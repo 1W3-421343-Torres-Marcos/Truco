@@ -8,6 +8,7 @@ import {
   useGameStore,
   type Action,
 } from '../../store/index.ts';
+import { SpanishCard } from '../cards/SpanishCard.tsx';
 import { ActionBar } from '../components/ActionBar.tsx';
 import { HandSummaryModal } from '../components/HandSummaryModal.tsx';
 import { TrickBoard } from '../components/TrickBoard.tsx';
@@ -105,9 +106,7 @@ export function TableScreen() {
 
       <section className={styles.botHandRow} aria-label="Cartas de la máquina">
         {hand.remainingCards.bot.map((_, idx) => (
-          <div key={`bot-card-${idx}`} className={styles.cardBack}>
-            Dorso
-          </div>
+          <SpanishCard key={`bot-card-${idx}`} faceDown size="sm" />
         ))}
       </section>
 
@@ -151,9 +150,7 @@ export function TableScreen() {
                   }
                 }}
               >
-                <span className={styles.cardCorner}>{card.number}</span>
-                <span className={styles.cardSuit}>{card.suit}</span>
-                <span className={styles.cardCorner}>{card.number}</span>
+                <SpanishCard suit={card.suit} number={card.number} size="md" />
               </button>
             );
           })}
