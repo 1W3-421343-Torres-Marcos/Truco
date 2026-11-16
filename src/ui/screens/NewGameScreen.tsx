@@ -7,6 +7,7 @@ import {
   type Difficulty,
   type TargetScore,
 } from '../../store/index.ts';
+import { GauchoAvatar } from '../components/GauchoAvatar.tsx';
 import styles from './NewGameScreen.module.css';
 
 const DIFFICULTY_LABELS: Readonly<Record<Difficulty, string>> = {
@@ -51,10 +52,15 @@ export function NewGameScreen() {
                 className={`${styles.characterOption} ${selected ? styles.characterOptionSelected : ''}`}
                 onClick={() => setDifficulty(diff)}
               >
-                <span className={styles.characterHeader}>
-                  {character.name} — {DIFFICULTY_LABELS[diff]} ({character.title})
-                </span>
-                <span className={styles.characterDesc}>{character.description}</span>
+                <div className={styles.characterRow}>
+                  <GauchoAvatar difficulty={diff} size={46} />
+                  <div className={styles.characterText}>
+                    <span className={styles.characterHeader}>
+                      {character.name} — {DIFFICULTY_LABELS[diff]} ({character.title})
+                    </span>
+                    <span className={styles.characterDesc}>{character.description}</span>
+                  </div>
+                </div>
               </button>
             );
           })}

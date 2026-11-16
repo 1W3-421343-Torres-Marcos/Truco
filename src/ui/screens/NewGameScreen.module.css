@@ -70,6 +70,18 @@
   background: #e6d1aa;
 }
 
+.characterRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.characterText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
 .characterHeader {
   font-weight: 700;
   font-size: 1rem;

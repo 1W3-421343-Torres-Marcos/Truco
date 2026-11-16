@@ -22,6 +22,12 @@
   border-radius: 10px;
 }
 
+.rivalIdentity {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .rivalHeader {
   display: flex;
   flex-direction: column;

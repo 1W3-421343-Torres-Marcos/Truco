@@ -10,6 +10,7 @@ import {
 } from '../../store/index.ts';
 import { SpanishCard } from '../cards/SpanishCard.tsx';
 import { ActionBar } from '../components/ActionBar.tsx';
+import { GauchoAvatar } from '../components/GauchoAvatar.tsx';
 import { HandSummaryModal } from '../components/HandSummaryModal.tsx';
 import { TrickBoard } from '../components/TrickBoard.tsx';
 import styles from './TableScreen.module.css';
@@ -60,15 +61,18 @@ export function TableScreen() {
   return (
     <main className={styles.tablePage} aria-label="Mesa de Truco">
       <header className={styles.topBar}>
-        <div className={styles.rivalHeader}>
-          <span className={styles.rivalName}>
-            {character.name} ({character.title})
-          </span>
-          {botSpeech && (
-            <div className={styles.speechBubble} role="status" aria-live="polite">
-              “{botSpeech}”
-            </div>
-          )}
+        <div className={styles.rivalIdentity}>
+          <GauchoAvatar difficulty={savedGame.difficulty} size={46} />
+          <div className={styles.rivalHeader}>
+            <span className={styles.rivalName}>
+              {character.name} ({character.title})
+            </span>
+            {botSpeech && (
+              <div className={styles.speechBubble} role="status" aria-live="polite">
+                “{botSpeech}”
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={styles.scoreboard} aria-label="Marcador">

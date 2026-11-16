@@ -117,7 +117,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 - [x] Paleta, tipografías, fondo de mesa de madera/pampa (`style(ui): tema campero`)
 - [x] 40 cartas españolas en SVG (componente generado) + dorso (`feat(ui): cartas svg`)
-- [ ] Avatares de los 3 personajes (`feat(ui): personajes`)
+- [x] Avatares de los 3 personajes (`feat(ui): personajes`)
 - [ ] Anotador con palitos/fósforos (grupos de 5, malas/buenas) (`feat(ui): anotador de palitos`)
 - [ ] Responsive móvil vertical primero (`style(ui): responsive`)
 - Tag `etapa-8`. **Punto de control con el usuario: aprobación visual.**
@@ -179,3 +179,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 7 · Pantallas de Historial (`HistoryScreen.tsx`), Estadísticas (`StatsScreen.tsx`) y Reglas (`RulesScreen.tsx`) + tests de integración de UI; cierre con tag `etapa-7` · `feat(ui): historial y estadisticas`
 - 2026-11-16 · Etapa 8 · Tema campero (`theme.css`) con texturas de mesa de madera, horizonte pampeano y tipografías criollas · `style(ui): tema campero`
 - 2026-11-16 · Etapa 8 · Componente `<SpanishCard />` con las 40 cartas españolas en SVG, pintas reglamentarias (0/1/2/3), figuras 10/11/12 y dorso con guarda pampa · `feat(ui): cartas svg`
+- 2026-11-16 · Etapa 8 · Retratos SVG de los 3 personajes (`GauchoAvatar.tsx`: El Pibe, Don Ramón y El Viejo Vizcacha) en mesa y selector · `feat(ui): personajes`
