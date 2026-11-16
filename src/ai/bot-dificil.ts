@@ -25,11 +25,12 @@ import { BOT_CHARACTERS } from './characters.ts';
 import type { Bot, PlayerView } from './types.ts';
 import { getMyEnvidoPoints, handStrength } from './view.ts';
 
-const MONTE_CARLO_SAMPLES = 140;
+const MONTE_CARLO_SAMPLES = 90;
 
-interface SampledRivalHand {
+export interface SampledRivalHand {
   readonly dealt: Hand;
   readonly remaining: readonly Card[];
+  readonly weight: number;
 }
 
 function findAction<T extends Action['type']>(
@@ -85,23 +86,23 @@ function drawRandomCards(pool: readonly Card[], count: number, rng: Rng): Card[]
 }
 
 /**
- * Evalúa qué tan verosímil (0..1) es una mano candidata del rival según las pistas observadas:
+ * Peso de verosimilitud Bayesiana para una mano candidata del rival según las pistas observadas:
  * - Si el envido fue querido, los puntos mostrados son exactos.
- * - Si el rival cantó envido, sesga hacia manos con envido alto (ajustado por opponentProfile).
- * - Si el rival pudo cantar envido al abrir y no lo hizo, sesga hacia envido < 27.
- * - Si el rival cantó truco, sesga hacia mayor handStrength.
+ * - Si el rival cantó envido, pondera alto las manos con envido >= 27 (ajustado por opponentProfile).
+ * - Si el rival pudo cantar envido al abrir y no lo hizo, pondera bajo las manos con envido >= 27.
+ * - Si el rival cantó truco, pondera según handStrength y tasa de farol observada.
  */
 function candidateLikelihood(candidateDealt: Hand, view: PlayerView): number {
   const candEnvido = calculateEnvido(candidateDealt);
   const profile = view.opponentProfile;
   const envidoBluffRate =
     profile.envidoShowdowns >= 3
-      ? Math.max(0.05, profile.envidoBluffsObserved / profile.envidoShowdowns)
-      : 0.08;
+      ? Math.max(0.02, profile.envidoBluffsObserved / profile.envidoShowdowns)
+      : 0.04;
 
-  // 1. Si el envido ya se mostró en mesa, debe coincidir exactamente
+  // 1. Si el envido ya se mostró en mesa, debe coincidir con el puntaje revelado
   if (view.envido.outcome?.accepted === true && view.envido.outcome.rivalRevealedPoints !== null) {
-    return candEnvido === view.envido.outcome.rivalRevealedPoints ? 1 : 0.01;
+    return candEnvido === view.envido.outcome.rivalRevealedPoints ? 1 : 0.001;
   }
 
   let weight = 1;
@@ -111,9 +112,11 @@ function candidateLikelihood(candidateDealt: Hand, view: PlayerView): number {
   if (rivalEnvidoCalls.length > 0) {
     const lastRivalCall = rivalEnvidoCalls[rivalEnvidoCalls.length - 1]!.call;
     const minExpected =
-      lastRivalCall === 'faltaEnvido' ? 30 : lastRivalCall === 'realEnvido' ? 28 : 26;
+      lastRivalCall === 'faltaEnvido' ? 30 : lastRivalCall === 'realEnvido' ? 29 : 27;
     if (candEnvido >= minExpected) {
       weight *= 1;
+    } else if (candEnvido >= minExpected - 1) {
+      weight *= 0.15;
     } else {
       weight *= envidoBluffRate;
     }
@@ -121,9 +124,9 @@ function candidateLikelihood(candidateDealt: Hand, view: PlayerView): number {
     !view.envidoCalledInHand &&
     (view.currentTrickIndex > 0 || view.tricks[0].cards[view.rival] !== undefined)
   ) {
-    // El rival ya tiró su 1ª carta sin cantar envido -> improbable que tenga >= 27
+    // El rival ya tiró su 1ª carta sin cantar envido -> muy improbable que tenga >= 27
     if (candEnvido >= 27) {
-      weight *= 0.12;
+      weight *= 0.04;
     }
   }
 
@@ -135,16 +138,16 @@ function candidateLikelihood(candidateDealt: Hand, view: PlayerView): number {
     const trucoBluffRate =
       profile.trucoShowdowns >= 3
         ? Math.max(0.08, profile.trucoBluffsObserved / profile.trucoShowdowns)
-        : 0.12;
+        : 0.1;
     const strength = handStrength(candidateDealt);
-    weight *= strength >= 0.55 ? 1 : trucoBluffRate + strength * 0.4;
+    weight *= strength >= 0.58 ? 1 : trucoBluffRate;
   }
 
   return weight;
 }
 
 /**
- * Muestrea N manos posibles del rival condicionadas a la historia observada de la mano.
+ * Muestrea N manos posibles del rival con importancia ponderada según la historia observada.
  */
 export function sampleRivalHands(
   view: PlayerView,
@@ -156,22 +159,14 @@ export function sampleRivalHands(
   const samples: SampledRivalHand[] = [];
 
   for (let i = 0; i < sampleCount; i++) {
-    let chosenRemaining = drawRandomCards(unseenCards, missingCount, rng);
-    let candidateDealt = [...rivalPlayedCards, ...chosenRemaining].slice(0, 3) as unknown as Hand;
-
-    // Rejection sampling ligero (hasta 5 intentos por muestra para mantener < 15 ms)
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const likelihood = candidateLikelihood(candidateDealt, view);
-      if (rng.next() <= likelihood) {
-        break;
-      }
-      chosenRemaining = drawRandomCards(unseenCards, missingCount, rng);
-      candidateDealt = [...rivalPlayedCards, ...chosenRemaining].slice(0, 3) as unknown as Hand;
-    }
+    const chosenRemaining = drawRandomCards(unseenCards, missingCount, rng);
+    const candidateDealt = [...rivalPlayedCards, ...chosenRemaining].slice(0, 3) as unknown as Hand;
+    const weight = candidateLikelihood(candidateDealt, view);
 
     samples.push({
       dealt: candidateDealt,
       remaining: chosenRemaining,
+      weight,
     });
   }
 
@@ -282,28 +277,30 @@ function simulateHandRollout(
 }
 
 /**
- * Estima por Monte Carlo la probabilidad de ganar el Envido contra las manos muestreadas.
+ * Estima por Monte Carlo ponderado la probabilidad de ganar el Envido.
  */
 function estimateEnvidoWinProb(view: PlayerView, samples: readonly SampledRivalHand[]): number {
   if (samples.length === 0) return 0.5;
   const myEnvido = getMyEnvidoPoints(view);
   const selfIsMano = view.manoPlayer === view.self;
 
-  let wins = 0;
+  let weightedWins = 0;
+  let totalWeight = 0;
   for (const sample of samples) {
     const rivalEnvido = calculateEnvido(sample.dealt);
     const manoPts = selfIsMano ? myEnvido : rivalEnvido;
     const piePts = selfIsMano ? rivalEnvido : myEnvido;
     const winnerRole = compareEnvido(manoPts, piePts);
     if ((winnerRole === 'mano' && selfIsMano) || (winnerRole === 'pie' && !selfIsMano)) {
-      wins++;
+      weightedWins += sample.weight;
     }
+    totalWeight += sample.weight;
   }
-  return wins / samples.length;
+  return totalWeight > 0 ? weightedWins / totalWeight : 0.5;
 }
 
 /**
- * Estima por Monte Carlo la probabilidad de ganar la mano (el Truco) desde el estado actual.
+ * Estima por Monte Carlo ponderado la probabilidad de ganar la mano (el Truco).
  */
 function estimateTrucoWinProb(
   view: PlayerView,
@@ -311,20 +308,18 @@ function estimateTrucoWinProb(
   forcedFirstMyCard?: Card,
 ): number {
   if (samples.length === 0) return 0.5;
-  let wins = 0;
+  let weightedWins = 0;
+  let totalWeight = 0;
   for (const sample of samples) {
     if (simulateHandRollout(view, view.myRemainingCards, sample.remaining, forcedFirstMyCard)) {
-      wins++;
+      weightedWins += sample.weight;
     }
+    totalWeight += sample.weight;
   }
-  return wins / samples.length;
+  return totalWeight > 0 ? weightedWins / totalWeight : 0.5;
 }
 
-function decideEnvidoResponse(
-  view: PlayerView,
-  samples: readonly SampledRivalHand[],
-  rng: Rng,
-): Action {
+function decideEnvidoResponse(view: PlayerView, samples: readonly SampledRivalHand[]): Action {
   const myScore = view.scores[view.self];
   const rivalScore = view.scores[view.rival];
   const calls = view.envido.calls.map((c) => c.call);
@@ -341,42 +336,32 @@ function decideEnvidoResponse(
   }
 
   const winProb = estimateEnvidoWinProb(view, samples);
+  const myEnvido = getMyEnvidoPoints(view);
 
-  // Evaluar si conviene subir la apuesta cuando la probabilidad de ganar es muy alta
-  if (winProb >= 0.82) {
+  // Subir la apuesta cuando la probabilidad de ganar es muy alta
+  if (winProb >= 0.8 && myEnvido >= 29) {
     const raiseOrder: readonly EnvidoCall[] = ['faltaEnvido', 'realEnvido', 'envido'];
     for (const targetCall of raiseOrder) {
       const raiseAction = findAction(view, 'callEnvido', (a) => a.call === targetCall);
       if (!raiseAction) continue;
-      if (targetCall === 'faltaEnvido' && winProb >= 0.9) {
+      if (targetCall === 'faltaEnvido' && (myEnvido >= 32 || (myEnvido >= 30 && winProb >= 0.9))) {
         return raiseAction;
       }
-      if (targetCall !== 'faltaEnvido' && (winProb >= 0.84 || rng.next() < 0.2)) {
+      if (targetCall !== 'faltaEnvido') {
         return raiseAction;
       }
     }
   }
 
-  // Farol ocasional subiendo envido cuando el rival tiende a achicarse
-  if (winProb >= 0.48 && rng.next() < 0.12) {
-    const smallRaise = findAction(
-      view,
-      'callEnvido',
-      (a) => a.call === 'envido' || a.call === 'realEnvido',
-    );
-    if (smallRaise) return smallRaise;
-  }
-
-  // Valor esperado de querer vs no querer (con penalización extra si perder el envido le da el partido al rival)
   const effectiveLoss =
-    rivalScore + acceptedLoss >= view.targetScore ? acceptedLoss * 1.6 : acceptedLoss;
+    rivalScore + acceptedLoss >= view.targetScore ? acceptedLoss * 1.8 : acceptedLoss;
   const effectiveGain =
     myScore + acceptedGain >= view.targetScore ? acceptedGain * 1.4 : acceptedGain;
 
   const evQuiero = winProb * effectiveGain - (1 - winProb) * effectiveLoss;
   const evNoQuiero = -declinedCost;
 
-  if (evQuiero >= evNoQuiero) {
+  if (evQuiero >= evNoQuiero && winProb >= 0.36) {
     return quiero ?? view.legalActions[0]!;
   }
   return noQuiero ?? view.legalActions[0]!;
@@ -390,10 +375,10 @@ function decideTrucoResponse(
   const myScore = view.scores[view.self];
   const rivalScore = view.scores[view.rival];
 
-  // "El envido está primero": si nos conviene cantar envido antes de responder el truco
+  // "El envido está primero": si tenemos buen envido o ventaja clara, cantarlo antes
   const envidoWinProb = estimateEnvidoWinProb(view, samples);
   const myEnvido = getMyEnvidoPoints(view);
-  if (envidoWinProb >= 0.62 || myEnvido >= 27) {
+  if (myEnvido >= 26 || envidoWinProb >= 0.65) {
     const preferredCall: EnvidoCall =
       myEnvido >= 32 ? 'faltaEnvido' : myEnvido >= 29 ? 'realEnvido' : 'envido';
     const envidoFirst =
@@ -412,28 +397,28 @@ function decideTrucoResponse(
   const noQuiero = findAction(view, 'respondTruco', (a) => a.response === 'noQuiero');
   const raise = findAction(view, 'callTruco');
 
-  // Si no querer ya entrega la partida, querer siempre que tengamos alguna chance
+  // Si no querer ya entrega la partida, querer siempre
   if (rivalScore + declinedCost >= view.targetScore) {
     return quiero ?? view.legalActions[0]!;
   }
 
   const trucoWinProb = estimateTrucoWinProb(view, samples);
 
-  // Subir a retruco / valeCuatro por valor o con farol selectivo (~20 %)
+  // Subir a retruco / valeCuatro por valor alto o farol en posición ganadora
   const canBluffRaise =
-    view.tricks[0].winner === view.self && trucoWinProb >= 0.42 && rng.next() < 0.2;
-  if (raise && (trucoWinProb >= 0.76 || canBluffRaise)) {
+    view.tricks[0].winner === view.self && trucoWinProb >= 0.55 && rng.next() < 0.15;
+  if (raise && (trucoWinProb >= 0.78 || canBluffRaise)) {
     return raise;
   }
 
   const effectiveLoss =
-    rivalScore + acceptedPoints >= view.targetScore ? acceptedPoints * 1.4 : acceptedPoints;
+    rivalScore + acceptedPoints >= view.targetScore ? acceptedPoints * 1.5 : acceptedPoints;
   const effectiveGain =
-    myScore + acceptedPoints >= view.targetScore ? acceptedPoints * 1.3 : acceptedPoints;
+    myScore + acceptedPoints >= view.targetScore ? acceptedPoints * 1.35 : acceptedPoints;
   const evQuiero = trucoWinProb * effectiveGain - (1 - trucoWinProb) * effectiveLoss;
   const evNoQuiero = -declinedCost;
 
-  if (evQuiero >= evNoQuiero) {
+  if (evQuiero >= evNoQuiero && trucoWinProb >= 0.38) {
     return quiero ?? view.legalActions[0]!;
   }
   return noQuiero ?? view.legalActions[0]!;
@@ -441,9 +426,9 @@ function decideTrucoResponse(
 
 /**
  * Bot Difícil — "El Viejo Vizcacha":
- * - Muestreo Monte Carlo (N=140) condicionado a los cantos y cartas vistas.
+ * - Muestreo Monte Carlo ponderado (N=90) condicionado a los cantos y cartas vistas.
  * - Cálculo de Valor Esperado (EV) en envido y truco ajustado por el marcador.
- * - Mentiras estratégicas (~20-25 %) y explotación de tendencias del rival.
+ * - Robo de envido como pie cuando el mano no cantó y mentiras selectivas (~20 %) en posición.
  * - Selección de carta que maximiza la probabilidad de ganar la mano ahorrando poder.
  */
 export const botDificil: Bot = {
@@ -458,7 +443,7 @@ export const botDificil: Bot = {
 
     // 1. Respuesta a Envido pendiente
     if (view.phase === 'awaitingEnvidoResponse') {
-      return decideEnvidoResponse(view, samples, rng);
+      return decideEnvidoResponse(view, samples);
     }
 
     // 2. Respuesta a Truco pendiente
@@ -474,29 +459,24 @@ export const botDificil: Bot = {
     if (view.currentTrickIndex === 0 && !view.envidoCalledInHand) {
       const envidoWinProb = estimateEnvidoWinProb(view, samples);
       const myEnvido = getMyEnvidoPoints(view);
-
-      // Si somos pie y el rival (mano) ya jugó carta sin cantar envido, explotamos con envido más bajo o robo
       const rivalPassedEnvido = view.tricks[0].cards[view.rival] !== undefined;
 
-      if (envidoWinProb >= 0.88 && (myEnvido >= 31 || scoreDeficit >= 10)) {
+      if (myEnvido >= 32 || (myEnvido >= 30 && scoreDeficit >= 8 && envidoWinProb >= 0.85)) {
         const falta = findAction(view, 'callEnvido', (a) => a.call === 'faltaEnvido');
         if (falta) return falta;
       }
-      if (envidoWinProb >= 0.78 && myEnvido >= 29) {
+      if (myEnvido >= 29 && envidoWinProb >= 0.78) {
         const real = findAction(view, 'callEnvido', (a) => a.call === 'realEnvido');
         if (real) return real;
       }
-      if (
-        envidoWinProb >= 0.6 ||
-        myEnvido >= 27 ||
-        (rivalPassedEnvido && (myEnvido >= 24 || rng.next() < 0.25))
-      ) {
+      // Como mano canta con >= 26; como pie cuando el mano pasó sin cantar, canta con >= 23 o roba ~35 %
+      if (myEnvido >= 26 || (rivalPassedEnvido && (myEnvido >= 23 || rng.next() < 0.35))) {
         const envido = findAction(view, 'callEnvido', (a) => a.call === 'envido');
         if (envido) return envido;
       }
     }
 
-    // 4. Evaluar cada carta legal mediante rollouts Monte Carlo
+    // 4. Evaluar cada carta legal mediante rollouts Monte Carlo ponderados
     const playActions = view.legalActions.filter(
       (a): a is Extract<Action, { type: 'playCard' }> => a.type === 'playCard',
     );
@@ -506,9 +486,8 @@ export const botDificil: Bot = {
 
     for (const action of playActions) {
       const winProb = estimateTrucoWinProb(view, samples, action.card);
-      // En caso de probabilidad muy similar (< 0.015), preferir conservar la carta más alta
-      // (es decir, jugar la de menor rank que logra el mismo resultado)
-      const rankTieBreaker = -getTrucoRank(action.card) * 0.001;
+      // En caso de probabilidad similar, preferir conservar la carta más alta para bazas futuras
+      const rankTieBreaker = -getTrucoRank(action.card) * 0.002;
       const adjustedScore = winProb + rankTieBreaker;
 
       if (adjustedScore > bestWinProb) {
@@ -519,23 +498,24 @@ export const botDificil: Bot = {
 
     const overallWinProb = Math.max(0, Math.min(1, bestWinProb));
 
-    // 5. Considerar cantar Truco / Retruco / Vale Cuatro (por valor, "a ley de juego" o mentira ~22 %)
+    // 5. Considerar cantar Truco / Retruco / Vale Cuatro (por valor, "a ley de juego" o mentira en posición)
     const callTrucoAction = findAction(view, 'callTruco');
     if (callTrucoAction) {
       const declinedGain = getTrucoDeclinedPoints(callTrucoAction.level);
       const freeCallAtMatchPoint = myScore + declinedGain >= view.targetScore;
       const positionalBluff =
-        (view.tricks[0].winner === view.self || view.currentTrickIndex === 2) &&
-        overallWinProb >= 0.32 &&
+        view.currentTrickIndex >= 1 &&
+        view.tricks[0].winner === view.self &&
+        overallWinProb >= 0.4 &&
         rng.next() < 0.22;
 
-      const valueThreshold = callTrucoAction.level === 'truco' ? 0.64 : 0.74;
+      const valueThreshold = callTrucoAction.level === 'truco' ? 0.65 : 0.76;
       if (freeCallAtMatchPoint || overallWinProb >= valueThreshold || positionalBluff) {
         return callTrucoAction;
       }
     }
 
-    // 6. Irse al mazo si la probabilidad de ganar es 0 en 2ª/3ª baza y no estamos faroleando
+    // 6. Irse al mazo si la probabilidad de ganar es prácticamente 0 en 2ª/3ª baza
     if (
       view.currentTrickIndex >= 1 &&
       overallWinProb <= 0.02 &&

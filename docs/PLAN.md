@@ -85,13 +85,13 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Simulación: 10 000 manos aleatorias sin errores ni puntajes inválidos (`test(engine): simulacion masiva`)
 - Tag `etapa-4`. **Punto de control con el usuario: revisar tabla de puntos.**
 
-### Etapa 5 — IA por dificultad
+### Etapa 5 — IA por dificultad ✅
 
 - [x] Interfaz `Bot` (`decide(view) => Action`), vista con información oculta (`feat(ai): interfaz de bot`)
 - [x] Fácil — "El Pibe" (`feat(ai): bot facil`)
 - [x] Medio — "Don Ramón" (`feat(ai): bot medio`)
 - [x] Difícil — "El Viejo Vizcacha" (Monte Carlo + mentiras + modelo del rival) (`feat(ai): bot dificil`)
-- [ ] Torneo automático: Difícil > Medio > Fácil en ≥ 1000 partidas (`test(ai): torneo entre bots`)
+- [x] Torneo automático: Difícil > Medio > Fácil en ≥ 1000 partidas (`test(ai): torneo entre bots`)
 - Tag `etapa-5`.
 
 ### Etapa 6 — Persistencia
@@ -165,3 +165,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 5 · Bot Fácil ("El Pibe") en `src/ai/bot-facil.ts` con tests · `feat(ai): bot facil`
 - 2026-11-16 · Etapa 5 · Bot Medio ("Don Ramón") con heurísticas clásicas de carta, envido en malas/buenas y ~10 % de mentira · `feat(ai): bot medio`
 - 2026-11-16 · Etapa 5 · Bot Difícil ("El Viejo Vizcacha") con muestreo Monte Carlo condicionado, EV, mentiras y modelo del rival · `feat(ai): bot dificil`
+- 2026-11-16 · Etapa 5 · Torneo automático de 3000 partidas (1000 por cruce: Medio > Fácil > 60 %, Difícil > Medio > 60 %, Difícil > Fácil > 75 %); cierre con tag `etapa-5` · `test(ai): torneo entre bots`

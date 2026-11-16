@@ -1,12 +1,4 @@
-import {
-  compareCards,
-  getEnvidoDeclinedPoints,
-  getTrucoDeclinedPoints,
-  getTrucoRank,
-  type Action,
-  type Card,
-  type Rng,
-} from '../engine/index.ts';
+import { compareCards, getTrucoRank, type Action, type Card, type Rng } from '../engine/index.ts';
 import { BOT_CHARACTERS } from './characters.ts';
 import type { Bot, PlayerView } from './types.ts';
 import { getMyEnvidoPoints, handStrength } from './view.ts';
@@ -61,45 +53,26 @@ export function chooseMedioCard(view: PlayerView): Card {
   return sortedAsc[sortedAsc.length - 1]!;
 }
 
-function estimateRemainingWinCapability(view: PlayerView): number {
+/**
+ * Evalúa la fuerza para el Truco según `handStrength` y bazas ganadas (skill `truco-ia`).
+ */
+function evaluateMedioTrucoScore(view: PlayerView): number {
   const myWins = view.tricks.filter((t) => t.winner === view.self).length;
   const rivalWins = view.tricks.filter((t) => t.winner === view.rival).length;
-  const pardas = view.tricks.filter(
-    (t) => t.winner === 'parda' && t !== view.tricks[view.currentTrickIndex],
-  ).length;
 
-  let base = handStrength(
-    view.myRemainingCards.length > 0 ? view.myRemainingCards : view.myDealtCards,
-  );
+  let score = handStrength(view.myDealtCards);
+  if (myWins > rivalWins) score += 0.2;
+  if (rivalWins > myWins) score -= 0.18;
 
-  // Ajustar si el rival ya tiró carta en la baza en curso
-  const rivalCardOnTable = view.tricks[view.currentTrickIndex].cards[view.rival];
-  const myCardOnTable = view.tricks[view.currentTrickIndex].cards[view.self];
-  if (rivalCardOnTable !== undefined && myCardOnTable === undefined) {
-    const canBeat = view.myRemainingCards.some((c) => compareCards(c, rivalCardOnTable) === 1);
-    const canTie = view.myRemainingCards.some((c) => compareCards(c, rivalCardOnTable) === 0);
-    if (canBeat) {
-      base += 0.2;
-    } else if (!canTie) {
-      base -= 0.25;
-    }
-  } else if (myCardOnTable !== undefined && rivalCardOnTable === undefined) {
-    base = Math.max(base, (getTrucoRank(myCardOnTable) - 1) / 13);
-  }
-
-  if (myWins > rivalWins) base += 0.25;
-  if (rivalWins > myWins) base -= 0.2;
-  if (pardas > 0 && view.manoPlayer === view.self) base += 0.08;
-
-  return Math.max(0, Math.min(1, base));
+  return Math.max(0, Math.min(1, score));
 }
 
 /**
  * Bot Medio — "Don Ramón":
- * - Heurísticas clásicas de carta ("mata con la menor que gana o achica").
- * - Envido: canta con >= 27, quiere con >= 25 (más conservador en buenas).
+ * - Heurísticas clásicas de carta: en 1ª baza juega carta media; si es pie, mata con la menor que gana o tira la más baja.
+ * - Envido: canta con >= 27, quiere con >= 25 (más conservador en buenas: >= 26).
  * - Falta envido solo si va perdiendo por mucho (>= 10) o tiene >= 31.
- * - Truco según fuerza y bazas ganadas; miente ~10 % de las veces.
+ * - Truco: canta/acepta según `handStrength` y bazas ganadas; miente ~10 % de las veces.
  */
 export const botMedio: Bot = {
   id: 'medio',
@@ -119,27 +92,16 @@ export const botMedio: Bot = {
       const myEnvido = getMyEnvidoPoints(view);
       const calls = view.envido.calls.map((c) => c.call);
       const lastCall = calls[calls.length - 1];
-      const declinedCost = getEnvidoDeclinedPoints(calls);
       const quiero = findAction(view, 'respondEnvido', (a) => a.response === 'quiero');
       const noQuiero = findAction(view, 'respondEnvido', (a) => a.response === 'noQuiero');
 
-      // Si no querer ya le da el partido al rival, obligado a querer con algo razonable
-      if (rivalScore + declinedCost >= view.targetScore && myEnvido >= 20) {
-        return quiero ?? view.legalActions[0]!;
-      }
-
-      // Considerar subir si tiene mano muy alta
       if (myEnvido >= 31 || (myEnvido >= 30 && scoreDeficit >= 10)) {
         const falta = findAction(view, 'callEnvido', (a) => a.call === 'faltaEnvido');
-        if (falta && rng.next() < 0.7) return falta;
-      }
-      if (myEnvido >= 29) {
-        const real = findAction(view, 'callEnvido', (a) => a.call === 'realEnvido');
-        if (real && rng.next() < 0.65) return real;
+        if (falta && rng.next() < 0.65) return falta;
       }
 
       if (lastCall === 'faltaEnvido') {
-        const minForFalta = scoreDeficit >= 10 ? 29 : 30;
+        const minForFalta = scoreDeficit >= 10 ? 29 : 31;
         return (myEnvido >= minForFalta ? quiero : noQuiero) ?? view.legalActions[0]!;
       }
       if (lastCall === 'realEnvido' || calls.length >= 2) {
@@ -154,34 +116,24 @@ export const botMedio: Bot = {
     // 2. Respuesta a Truco pendiente
     if (view.phase === 'awaitingTrucoResponse') {
       const myEnvido = getMyEnvidoPoints(view);
-      // "El envido está primero": si tiene >= 27 responde con envido antes del truco
       if (myEnvido >= 27) {
-        const envidoFirst = findAction(
-          view,
-          'callEnvido',
-          (a) => a.call === (myEnvido >= 30 ? 'realEnvido' : 'envido'),
-        );
+        const envidoFirst = findAction(view, 'callEnvido', (a) => a.call === 'envido');
         if (envidoFirst) return envidoFirst;
       }
 
       const pendingLevel = view.truco.pendingCall?.level ?? 'truco';
-      const declinedCost = getTrucoDeclinedPoints(pendingLevel);
-      const capability = estimateRemainingWinCapability(view);
+      const capability = evaluateMedioTrucoScore(view);
       const bluff = rng.next() < 0.1;
 
       const quiero = findAction(view, 'respondTruco', (a) => a.response === 'quiero');
       const noQuiero = findAction(view, 'respondTruco', (a) => a.response === 'noQuiero');
       const raise = findAction(view, 'callTruco');
 
-      if (rivalScore + declinedCost >= view.targetScore && capability >= 0.35) {
-        return quiero ?? view.legalActions[0]!;
-      }
-
-      if (raise && (capability >= 0.78 || (bluff && capability >= 0.5))) {
+      if (raise && (capability >= 0.8 || bluff)) {
         return raise;
       }
 
-      const threshold = pendingLevel === 'truco' ? 0.48 : pendingLevel === 'retruco' ? 0.62 : 0.72;
+      const threshold = pendingLevel === 'truco' ? 0.5 : pendingLevel === 'retruco' ? 0.65 : 0.75;
       if (capability >= threshold || (bluff && pendingLevel === 'truco')) {
         return quiero ?? view.legalActions[0]!;
       }
@@ -191,13 +143,9 @@ export const botMedio: Bot = {
     // 3. Turno normal de juego: considerar cantar Envido en 1ª baza
     const myEnvido = getMyEnvidoPoints(view);
     if (view.currentTrickIndex === 0 && !view.envidoCalledInHand) {
-      if ((myEnvido >= 31 || (myEnvido >= 29 && scoreDeficit >= 10)) && rng.next() < 0.75) {
+      if ((myEnvido >= 31 || (myEnvido >= 29 && scoreDeficit >= 10)) && rng.next() < 0.7) {
         const falta = findAction(view, 'callEnvido', (a) => a.call === 'faltaEnvido');
         if (falta) return falta;
-      }
-      if (myEnvido >= 30 && rng.next() < 0.8) {
-        const real = findAction(view, 'callEnvido', (a) => a.call === 'realEnvido');
-        if (real) return real;
       }
       if (myEnvido >= 27) {
         const envido = findAction(view, 'callEnvido', (a) => a.call === 'envido');
@@ -205,19 +153,19 @@ export const botMedio: Bot = {
       }
     }
 
-    // 4. Considerar cantar o subir Truco (con ~10 % de mentira)
+    // 4. Considerar cantar o subir Truco (según handStrength y bazas ganadas, ~10 % mentira)
     const callTrucoAction = findAction(view, 'callTruco');
-    const capability = estimateRemainingWinCapability(view);
+    const capability = evaluateMedioTrucoScore(view);
     const bluff = rng.next() < 0.1;
 
     if (callTrucoAction) {
-      const minCap = callTrucoAction.level === 'truco' ? 0.66 : 0.78;
-      if (capability >= minCap || (bluff && view.currentTrickIndex >= 1)) {
+      const minCap = callTrucoAction.level === 'truco' ? 0.65 : 0.78;
+      if (capability >= minCap || bluff) {
         return callTrucoAction;
       }
     }
 
-    // 5. Jugar carta según heurística de Don Ramón
+    // 5. Jugar carta según heurística clásica
     const playActions = view.legalActions.filter(
       (a): a is Extract<Action, { type: 'playCard' }> => a.type === 'playCard',
     );
