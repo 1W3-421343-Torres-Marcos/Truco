@@ -53,6 +53,7 @@ export interface GameStoreState {
   readonly savedGame: SavedGame | null;
   readonly opponentProfile: OpponentProfile;
   readonly botSpeech: string | null;
+  readonly humanSpeech: string | null;
   readonly botRngSeed: number;
   readonly history: readonly GameRecord[];
   readonly stats: Stats;
@@ -75,6 +76,29 @@ function actionToPhraseEvent(action: Action): PhraseEvent | null {
   if (action.type === 'callTruco') return action.level;
   if (action.type === 'respondTruco') return action.response;
   if (action.type === 'foldToMazo') return 'mazo';
+  return null;
+}
+
+function actionToHumanSpeech(action: Action): string | null {
+  if (action.type === 'callEnvido') {
+    if (action.call === 'envido') return '¡Envido!';
+    if (action.call === 'realEnvido') return '¡Real Envido!';
+    return '¡Falta Envido!';
+  }
+  if (action.type === 'respondEnvido') {
+    return action.response === 'quiero' ? '¡Quiero!' : 'No quiero';
+  }
+  if (action.type === 'callTruco') {
+    if (action.level === 'truco') return '¡Truco!';
+    if (action.level === 'retruco') return '¡Quiero Retruco!';
+    return '¡Quiero Vale Cuatro!';
+  }
+  if (action.type === 'respondTruco') {
+    return action.response === 'quiero' ? '¡Quiero!' : 'No quiero';
+  }
+  if (action.type === 'foldToMazo') {
+    return 'Me voy al mazo';
+  }
   return null;
 }
 
@@ -104,7 +128,8 @@ export function createTrucoStore(
     function commitGameStateTransition(
       prevSaved: SavedGame,
       nextState: GameState,
-      speech: string | null,
+      botSpeech: string | null,
+      humanSpeech: string | null,
       nextBotRngSeed: number,
     ): void {
       const timestamp = nowIso();
@@ -128,7 +153,8 @@ export function createTrucoStore(
         set({
           savedGame: updatedSaved,
           opponentProfile,
-          botSpeech: speech,
+          botSpeech,
+          humanSpeech,
           botRngSeed: nextBotRngSeed,
           history: loadHistory(storage),
           stats,
@@ -140,7 +166,8 @@ export function createTrucoStore(
       set({
         savedGame: updatedSaved,
         opponentProfile,
-        botSpeech: speech,
+        botSpeech,
+        humanSpeech,
         botRngSeed: nextBotRngSeed,
       });
     }
@@ -150,6 +177,7 @@ export function createTrucoStore(
       savedGame: initialSaved,
       opponentProfile: createOpponentProfile(),
       botSpeech: null,
+      humanSpeech: null,
       botRngSeed: initialSaved ? (initialSaved.seed ^ 0x5a5a5a5a) >>> 0 : 20261116,
       history: initialHistory,
       stats: initialStats,
@@ -196,6 +224,7 @@ export function createTrucoStore(
           savedGame: saved,
           opponentProfile: createOpponentProfile(),
           botSpeech: null,
+          humanSpeech: null,
           botRngSeed: (seed ^ 0x5a5a5a5a) >>> 0,
           history: loadHistory(storage),
           stats: loadStats(storage),
@@ -222,13 +251,14 @@ export function createTrucoStore(
           screen: 'home',
           savedGame: null,
           botSpeech: null,
+          humanSpeech: null,
           history: loadHistory(storage),
           stats,
         });
       },
 
       playHumanAction(action: Action): void {
-        const { savedGame, botRngSeed } = get();
+        const { savedGame, botRngSeed, botSpeech } = get();
         if (savedGame === null || savedGame.state.winner !== null) {
           throw new Error('No hay una partida activa en curso');
         }
@@ -237,11 +267,12 @@ export function createTrucoStore(
         }
 
         const nextState = applyAction(savedGame.state, action);
-        commitGameStateTransition(savedGame, nextState, null, botRngSeed);
+        const humanSpeech = actionToHumanSpeech(action);
+        commitGameStateTransition(savedGame, nextState, botSpeech, humanSpeech, botRngSeed);
       },
 
       runBotTurn(): Action | null {
-        const { savedGame, opponentProfile, botRngSeed } = get();
+        const { savedGame, opponentProfile, botRngSeed, humanSpeech } = get();
         if (savedGame === null || savedGame.state.winner !== null) {
           return null;
         }
@@ -269,7 +300,7 @@ export function createTrucoStore(
             ? pickBotPhrase(savedGame.difficulty, phraseEvent, rng)
             : get().botSpeech;
 
-        commitGameStateTransition(savedGame, nextState, speech, rng.getState());
+        commitGameStateTransition(savedGame, nextState, speech, humanSpeech, rng.getState());
         return chosenAction;
       },
 
@@ -293,6 +324,7 @@ export function createTrucoStore(
         set({
           savedGame: updatedSaved,
           botSpeech: null,
+          humanSpeech: null,
         });
       },
 

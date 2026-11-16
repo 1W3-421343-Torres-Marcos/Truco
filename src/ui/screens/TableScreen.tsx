@@ -14,12 +14,14 @@ import { ActionBar } from '../components/ActionBar.tsx';
 import { GauchoAvatar } from '../components/GauchoAvatar.tsx';
 import { HandSummaryModal } from '../components/HandSummaryModal.tsx';
 import { MatchstickScoreboard } from '../components/MatchstickScoreboard.tsx';
+import { SpeechBubble } from '../components/SpeechBubble.tsx';
 import { TrickBoard } from '../components/TrickBoard.tsx';
 import styles from './TableScreen.module.css';
 
 export function TableScreen() {
   const savedGame = useGameStore((s) => s.savedGame);
   const botSpeech = useGameStore((s) => s.botSpeech);
+  const humanSpeech = useGameStore((s) => s.humanSpeech);
   const playHumanAction = useGameStore((s) => s.playHumanAction);
   const runBotTurn = useGameStore((s) => s.runBotTurn);
   const advanceToNextHand = useGameStore((s) => s.advanceToNextHand);
@@ -64,11 +66,7 @@ export function TableScreen() {
             <span className={styles.rivalName}>
               {character.name} ({character.title})
             </span>
-            {botSpeech && (
-              <div className={styles.speechBubble} role="status" aria-live="polite">
-                “{botSpeech}”
-              </div>
-            )}
+            <SpeechBubble text={botSpeech} speakerName={character.name} variant="bot" />
           </div>
         </div>
 
@@ -140,6 +138,7 @@ export function TableScreen() {
       </section>
 
       <section className={styles.myHandSection} aria-label="Tus cartas">
+        <SpeechBubble text={humanSpeech} speakerName="Vos" variant="human" />
         <div className={styles.myCardsRow}>
           {hand.remainingCards.human.map((card, idx) => {
             const id = cardId(card);

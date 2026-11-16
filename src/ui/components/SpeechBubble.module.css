@@ -1,0 +1,35 @@
+.bubble {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.25;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+  max-width: 260px;
+}
+
+.bot {
+  background-color: var(--crema);
+  color: var(--tinta);
+  border: 2px solid var(--madera-oscura);
+}
+
+.bot::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 6px 7px 6px 0;
+  border-style: solid;
+  border-color: transparent var(--crema) transparent transparent;
+}
+
+.human {
+  background-color: #e3f2fd;
+  color: var(--tinta);
+  border: 2px solid var(--madera-oscura);
+}
