@@ -46,7 +46,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Definir decisiones con el usuario
 - [x] Crear `AGENTS.md`, skills y `docs/PLAN.md` (`docs: plan inicial, reglas y skills`)
 
-### Etapa 1 — Entorno y esqueleto
+### Etapa 1 — Entorno y esqueleto ✅
 
 > Requisito: Node.js LTS (≥ 20). Instalado v26.13.1 / npm 11.20.0 vía `winget install OpenJS.NodeJS.LTS`.
 
@@ -55,7 +55,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] ESLint + Prettier + `tsconfig` strict (`chore: lint y formato`)
 - [x] Vitest + Testing Library + test de humo (`test: configura vitest`)
 - [x] Estructura de carpetas `src/{engine,ai,persistence,store,ui}` y scripts `lint/test/build` (`chore: estructura de capas`)
-- [ ] `README.md` con cómo correr el proyecto (`docs: readme`)
+- [x] `README.md` con cómo correr el proyecto (`docs: readme`)
 - Hecho cuando: `npm run lint && npm test && npm run build` pasa. Tag `etapa-1`.
 
 ### Etapa 2 — Engine: cartas y envido
@@ -145,3 +145,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 1 · ESLint 10 (reglas de capas, engine sin Math.random/Date.now/DOM) + Prettier + TS strict. TypeScript fijado en ~6.0 porque typescript-eslint 8 no soporta TS 7. `npm audit`: 7 moderadas solo en dev (minimatch vía typescript-eslint), aceptadas · `chore: lint y formato`
 - 2026-11-16 · Etapa 1 · Vitest 5 + Testing Library; entorno `node` por defecto, UI con `// @vitest-environment jsdom`; 2 tests de humo · `test: configura vitest`
 - 2026-11-16 · Etapa 1 · Capas `src/{engine,ai,persistence,store,ui}` + `theme.css` con la paleta; reglas de capas verificadas con imports prohibidos de prueba (9/9 detectados) · `chore: estructura de capas`
+- 2026-11-16 · Etapa 1 · `README.md` con comandos, capas y guía de continuación; cierre de etapa con tag `etapa-1` · `docs: readme`
