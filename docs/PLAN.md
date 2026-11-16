@@ -61,7 +61,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 ### Etapa 2 — Engine: cartas y envido
 
 - [x] Tipos `Suit`, `Card`, mazo de 40 cartas, RNG con semilla, mezclar y repartir (`feat(engine): mazo y reparto`)
-- [ ] Jerarquía de truco y `compareCards` (`feat(engine): jerarquia de cartas`)
+- [x] Jerarquía de truco y `compareCards` (`feat(engine): jerarquia de cartas`)
 - [ ] `calculateEnvido(hand)` (`feat(engine): calculo de envido`)
 - [ ] Tests exhaustivos de jerarquía y envido (todas las combinaciones relevantes)
 - Hecho cuando: cobertura de `engine/cards` y `engine/envido` ≥ 95 %. Tag `etapa-2`.
@@ -147,3 +147,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 1 · Capas `src/{engine,ai,persistence,store,ui}` + `theme.css` con la paleta; reglas de capas verificadas con imports prohibidos de prueba (9/9 detectados) · `chore: estructura de capas`
 - 2026-11-16 · Etapa 1 · `README.md` con comandos, capas y guía de continuación; cierre de etapa con tag `etapa-1` · `docs: readme`
 - 2026-11-16 · Etapa 2 · Tipos `Suit`/`Card`, mazo de 40 cartas, RNG Mulberry32 con semilla, `shuffleDeck` y `dealHands` con tests · `feat(engine): mazo y reparto`
+- 2026-11-16 · Etapa 2 · Jerarquía de Truco (`getTrucoRank` 1..14) y `compareCards` (-1/0/1) con tests · `feat(engine): jerarquia de cartas`

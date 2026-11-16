@@ -3,9 +3,11 @@ import {
   CARD_NUMBERS,
   SUITS,
   cardId,
+  compareCards,
   createDeck,
   dealHands,
   formatCard,
+  getTrucoRank,
   shuffleDeck,
 } from './cards.ts';
 import { createRng } from './rng.ts';
@@ -58,5 +60,42 @@ describe('mazo y reparto', () => {
   it('dealHands lanza error si el mazo tiene menos de 6 cartas', () => {
     const shortDeck = createDeck().slice(0, 5);
     expect(() => dealHands(shortDeck)).toThrow(/al menos 6 cartas/);
+  });
+});
+
+describe('jerarquía de truco y compareCards', () => {
+  it('asigna el rank exacto 1..14 a cada escalón de la tabla oficial', () => {
+    expect(getTrucoRank({ suit: 'espada', number: 1 })).toBe(14);
+    expect(getTrucoRank({ suit: 'basto', number: 1 })).toBe(13);
+    expect(getTrucoRank({ suit: 'espada', number: 7 })).toBe(12);
+    expect(getTrucoRank({ suit: 'oro', number: 7 })).toBe(11);
+    expect(getTrucoRank({ suit: 'copa', number: 3 })).toBe(10);
+    expect(getTrucoRank({ suit: 'oro', number: 2 })).toBe(9);
+    expect(getTrucoRank({ suit: 'oro', number: 1 })).toBe(8);
+    expect(getTrucoRank({ suit: 'copa', number: 1 })).toBe(8);
+    expect(getTrucoRank({ suit: 'espada', number: 12 })).toBe(7);
+    expect(getTrucoRank({ suit: 'basto', number: 11 })).toBe(6);
+    expect(getTrucoRank({ suit: 'copa', number: 10 })).toBe(5);
+    expect(getTrucoRank({ suit: 'basto', number: 7 })).toBe(4);
+    expect(getTrucoRank({ suit: 'copa', number: 7 })).toBe(4);
+    expect(getTrucoRank({ suit: 'espada', number: 6 })).toBe(3);
+    expect(getTrucoRank({ suit: 'oro', number: 5 })).toBe(2);
+    expect(getTrucoRank({ suit: 'basto', number: 4 })).toBe(1);
+  });
+
+  it('compara correctamente cartas ganadoras, perdedoras y pardas', () => {
+    const anchoEspada = { suit: 'espada', number: 1 } as const;
+    const anchoBasto = { suit: 'basto', number: 1 } as const;
+    const sieteEspada = { suit: 'espada', number: 7 } as const;
+    const sieteBasto = { suit: 'basto', number: 7 } as const;
+    const sieteCopa = { suit: 'copa', number: 7 } as const;
+    const anchoOro = { suit: 'oro', number: 1 } as const;
+    const anchoCopa = { suit: 'copa', number: 1 } as const;
+
+    expect(compareCards(anchoEspada, anchoBasto)).toBe(1);
+    expect(compareCards(anchoBasto, anchoEspada)).toBe(-1);
+    expect(compareCards(sieteEspada, sieteBasto)).toBe(1);
+    expect(compareCards(sieteBasto, sieteCopa)).toBe(0);
+    expect(compareCards(anchoOro, anchoCopa)).toBe(0);
   });
 });

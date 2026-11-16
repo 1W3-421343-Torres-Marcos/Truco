@@ -79,3 +79,50 @@ export function dealHands(deck: readonly Card[]): { mano: Hand; pie: Hand } {
     pie: [c1, c3, c5],
   };
 }
+
+/**
+ * Devuelve el rango de poder de una carta en el Truco (1 = más baja, 14 = más alta).
+ * Ver tabla en skill `truco-reglas`.
+ */
+export function getTrucoRank(card: Card): number {
+  const { suit, number } = card;
+  if (number === 1 && suit === 'espada') return 14;
+  if (number === 1 && suit === 'basto') return 13;
+  if (number === 7 && suit === 'espada') return 12;
+  if (number === 7 && suit === 'oro') return 11;
+
+  switch (number) {
+    case 3:
+      return 10;
+    case 2:
+      return 9;
+    case 1:
+      return 8; // 1 de oro, 1 de copa (anchos falsos)
+    case 12:
+      return 7;
+    case 11:
+      return 6;
+    case 10:
+      return 5;
+    case 7:
+      return 4; // 7 de basto, 7 de copa (sietes falsos)
+    case 6:
+      return 3;
+    case 5:
+      return 2;
+    case 4:
+      return 1;
+  }
+}
+
+/**
+ * Compara dos cartas según la jerarquía del Truco.
+ * Devuelve `1` si gana `cardA`, `-1` si gana `cardB`, `0` si es parda.
+ */
+export function compareCards(cardA: Card, cardB: Card): 1 | 0 | -1 {
+  const rankA = getTrucoRank(cardA);
+  const rankB = getTrucoRank(cardB);
+  if (rankA > rankB) return 1;
+  if (rankA < rankB) return -1;
+  return 0;
+}
