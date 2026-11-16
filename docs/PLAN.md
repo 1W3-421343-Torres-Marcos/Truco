@@ -87,7 +87,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 ### Etapa 5 — IA por dificultad
 
-- [ ] Interfaz `Bot` (`decide(view) => Action`), vista con información oculta (`feat(ai): interfaz de bot`)
+- [x] Interfaz `Bot` (`decide(view) => Action`), vista con información oculta (`feat(ai): interfaz de bot`)
 - [ ] Fácil — "El Pibe" (`feat(ai): bot facil`)
 - [ ] Medio — "Don Ramón" (`feat(ai): bot medio`)
 - [ ] Difícil — "El Viejo Vizcacha" (Monte Carlo + mentiras + modelo del rival) (`feat(ai): bot dificil`)
@@ -161,3 +161,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 4 · `calculateFaltaEnvidoPoints` (malas/buenas a 30 y partida a 15) y `getEnvidoAcceptedPoints` con tests · `feat(engine): falta envido`
 - 2026-11-16 · Etapa 4 · Integración de `callEnvido`/`respondEnvido` en `game.ts`, "el envido está primero" y fin de partida inmediato al alcanzar `targetScore` · `feat(engine): puntuacion y fin de partida`
 - 2026-11-16 · Etapa 4 · Simulación masiva de 10 000 manos aleatorias (a 15 y a 30 puntos) sin errores ni puntajes inválidos; cierre con tag `etapa-4` · `test(engine): simulacion masiva`
+- 2026-11-16 · Etapa 5 · Interfaz `Bot`, `PlayerView` sin información oculta, `handStrength`, `OpponentProfile` y personajes con frases criollas · `feat(ai): interfaz de bot`
