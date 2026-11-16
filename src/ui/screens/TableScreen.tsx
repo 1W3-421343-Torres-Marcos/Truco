@@ -9,6 +9,7 @@ import {
   type Action,
 } from '../../store/index.ts';
 import { ActionBar } from '../components/ActionBar.tsx';
+import { HandSummaryModal } from '../components/HandSummaryModal.tsx';
 import { TrickBoard } from '../components/TrickBoard.tsx';
 import styles from './TableScreen.module.css';
 
@@ -23,6 +24,8 @@ export function TableScreen() {
   const botSpeech = useGameStore((s) => s.botSpeech);
   const playHumanAction = useGameStore((s) => s.playHumanAction);
   const runBotTurn = useGameStore((s) => s.runBotTurn);
+  const advanceToNextHand = useGameStore((s) => s.advanceToNextHand);
+  const startNewGame = useGameStore((s) => s.startNewGame);
   const navigateTo = useGameStore((s) => s.navigateTo);
 
   const state = savedGame?.state ?? null;
@@ -113,6 +116,19 @@ export function TableScreen() {
           tricks={hand.tricks}
           currentTrickIndex={hand.currentTrickIndex}
           rivalName={character.name}
+        />
+
+        <HandSummaryModal
+          state={state}
+          rivalName={character.name}
+          onNextHand={advanceToNextHand}
+          onRematch={() =>
+            startNewGame({
+              difficulty: savedGame.difficulty,
+              targetScore: state.targetScore,
+            })
+          }
+          onGoHome={() => navigateTo('home')}
         />
       </section>
 

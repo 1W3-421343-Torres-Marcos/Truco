@@ -1,0 +1,69 @@
+.overlay {
+  background-color: var(--crema);
+  color: var(--tinta);
+  border: 3px solid var(--madera-oscura);
+  border-radius: 12px;
+  padding: 1rem;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--madera-oscura);
+  text-align: center;
+}
+
+.detailBox {
+  background-color: #ede0c4;
+  border: 1px solid var(--cuero);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.line {
+  margin: 0;
+}
+
+.scoreSummary {
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid var(--madera-oscura);
+}
+
+.primaryButton {
+  background-color: var(--madera);
+  color: var(--crema);
+}
+
+.secondaryButton {
+  background-color: var(--crema);
+  color: var(--tinta);
+}
