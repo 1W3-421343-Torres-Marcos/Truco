@@ -9,10 +9,15 @@ import {
   formatCard,
   getTrucoRank,
   shuffleDeck,
+  type Card,
 } from './cards.ts';
 import { createRng } from './rng.ts';
 
 describe('mazo y reparto', () => {
+  it('corre en entorno Node puro, sin DOM', () => {
+    expect(typeof globalThis.document).toBe('undefined');
+  });
+
   it('crea un mazo de 40 cartas únicas con los 4 palos y 10 números', () => {
     const deck = createDeck();
     expect(deck).toHaveLength(40);
@@ -63,39 +68,65 @@ describe('mazo y reparto', () => {
   });
 });
 
-describe('jerarquía de truco y compareCards', () => {
-  it('asigna el rank exacto 1..14 a cada escalón de la tabla oficial', () => {
-    expect(getTrucoRank({ suit: 'espada', number: 1 })).toBe(14);
-    expect(getTrucoRank({ suit: 'basto', number: 1 })).toBe(13);
-    expect(getTrucoRank({ suit: 'espada', number: 7 })).toBe(12);
-    expect(getTrucoRank({ suit: 'oro', number: 7 })).toBe(11);
-    expect(getTrucoRank({ suit: 'copa', number: 3 })).toBe(10);
-    expect(getTrucoRank({ suit: 'oro', number: 2 })).toBe(9);
-    expect(getTrucoRank({ suit: 'oro', number: 1 })).toBe(8);
-    expect(getTrucoRank({ suit: 'copa', number: 1 })).toBe(8);
-    expect(getTrucoRank({ suit: 'espada', number: 12 })).toBe(7);
-    expect(getTrucoRank({ suit: 'basto', number: 11 })).toBe(6);
-    expect(getTrucoRank({ suit: 'copa', number: 10 })).toBe(5);
-    expect(getTrucoRank({ suit: 'basto', number: 7 })).toBe(4);
-    expect(getTrucoRank({ suit: 'copa', number: 7 })).toBe(4);
-    expect(getTrucoRank({ suit: 'espada', number: 6 })).toBe(3);
-    expect(getTrucoRank({ suit: 'oro', number: 5 })).toBe(2);
-    expect(getTrucoRank({ suit: 'basto', number: 4 })).toBe(1);
+describe('jerarquía de truco y compareCards (exhaustivo)', () => {
+  // Escalones de mayor (rank 14) a menor (rank 1) según skill `truco-reglas`
+  const EXPECTED_TIERS: ReadonlyArray<{ rank: number; cards: readonly Card[] }> = [
+    { rank: 14, cards: [{ suit: 'espada', number: 1 }] },
+    { rank: 13, cards: [{ suit: 'basto', number: 1 }] },
+    { rank: 12, cards: [{ suit: 'espada', number: 7 }] },
+    { rank: 11, cards: [{ suit: 'oro', number: 7 }] },
+    { rank: 10, cards: SUITS.map((suit) => ({ suit, number: 3 as const })) },
+    { rank: 9, cards: SUITS.map((suit) => ({ suit, number: 2 as const })) },
+    {
+      rank: 8,
+      cards: [
+        { suit: 'oro', number: 1 },
+        { suit: 'copa', number: 1 },
+      ],
+    },
+    { rank: 7, cards: SUITS.map((suit) => ({ suit, number: 12 as const })) },
+    { rank: 6, cards: SUITS.map((suit) => ({ suit, number: 11 as const })) },
+    { rank: 5, cards: SUITS.map((suit) => ({ suit, number: 10 as const })) },
+    {
+      rank: 4,
+      cards: [
+        { suit: 'basto', number: 7 },
+        { suit: 'copa', number: 7 },
+      ],
+    },
+    { rank: 3, cards: SUITS.map((suit) => ({ suit, number: 6 as const })) },
+    { rank: 2, cards: SUITS.map((suit) => ({ suit, number: 5 as const })) },
+    { rank: 1, cards: SUITS.map((suit) => ({ suit, number: 4 as const })) },
+  ];
+
+  it('cubre exactamente las 40 cartas repartidas en los 14 escalones de jerarquía', () => {
+    const allTierCards = EXPECTED_TIERS.flatMap((tier) => tier.cards);
+    expect(allTierCards).toHaveLength(40);
+    expect(new Set(allTierCards.map(cardId)).size).toBe(40);
+
+    for (const tier of EXPECTED_TIERS) {
+      for (const card of tier.cards) {
+        expect(getTrucoRank(card)).toBe(tier.rank);
+      }
+    }
   });
 
-  it('compara correctamente cartas ganadoras, perdedoras y pardas', () => {
-    const anchoEspada = { suit: 'espada', number: 1 } as const;
-    const anchoBasto = { suit: 'basto', number: 1 } as const;
-    const sieteEspada = { suit: 'espada', number: 7 } as const;
-    const sieteBasto = { suit: 'basto', number: 7 } as const;
-    const sieteCopa = { suit: 'copa', number: 7 } as const;
-    const anchoOro = { suit: 'oro', number: 1 } as const;
-    const anchoCopa = { suit: 'copa', number: 1 } as const;
+  it('verifica las 1600 comparaciones pares (40x40): reflexividad, antisimetría y orden total', () => {
+    for (let i = 0; i < EXPECTED_TIERS.length; i++) {
+      const tierA = EXPECTED_TIERS[i]!;
+      for (let j = 0; j < EXPECTED_TIERS.length; j++) {
+        const tierB = EXPECTED_TIERS[j]!;
+        const expectedResult = tierA.rank > tierB.rank ? 1 : tierA.rank < tierB.rank ? -1 : 0;
 
-    expect(compareCards(anchoEspada, anchoBasto)).toBe(1);
-    expect(compareCards(anchoBasto, anchoEspada)).toBe(-1);
-    expect(compareCards(sieteEspada, sieteBasto)).toBe(1);
-    expect(compareCards(sieteBasto, sieteCopa)).toBe(0);
-    expect(compareCards(anchoOro, anchoCopa)).toBe(0);
+        for (const cardA of tierA.cards) {
+          for (const cardB of tierB.cards) {
+            expect(compareCards(cardA, cardB)).toBe(expectedResult);
+            expect(compareCards(cardB, cardA)).toBe(
+              expectedResult === 0 ? 0 : (-expectedResult as 1 | -1),
+            );
+          }
+        }
+      }
+    }
   });
 });

@@ -32,12 +32,9 @@ export function calculateEnvido(cards: readonly Card[]): number {
     const second = suitValues[1];
 
     if (first !== undefined && second !== undefined) {
-      const pairScore = 20 + first + second;
-      if (pairScore > bestScore) {
-        bestScore = pairScore;
-      }
-    } else if (first !== undefined && first > bestScore) {
-      bestScore = first;
+      bestScore = Math.max(bestScore, 20 + first + second);
+    } else if (first !== undefined) {
+      bestScore = Math.max(bestScore, first);
     }
   }
 

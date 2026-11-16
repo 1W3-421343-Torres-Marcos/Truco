@@ -58,12 +58,12 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] `README.md` con cómo correr el proyecto (`docs: readme`)
 - Hecho cuando: `npm run lint && npm test && npm run build` pasa. Tag `etapa-1`.
 
-### Etapa 2 — Engine: cartas y envido
+### Etapa 2 — Engine: cartas y envido ✅
 
 - [x] Tipos `Suit`, `Card`, mazo de 40 cartas, RNG con semilla, mezclar y repartir (`feat(engine): mazo y reparto`)
 - [x] Jerarquía de truco y `compareCards` (`feat(engine): jerarquia de cartas`)
 - [x] `calculateEnvido(hand)` (`feat(engine): calculo de envido`)
-- [ ] Tests exhaustivos de jerarquía y envido (todas las combinaciones relevantes)
+- [x] Tests exhaustivos de jerarquía y envido (todas las combinaciones relevantes)
 - Hecho cuando: cobertura de `engine/cards` y `engine/envido` ≥ 95 %. Tag `etapa-2`.
 
 ### Etapa 3 — Engine: flujo de la mano y truco
@@ -149,3 +149,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 2 · Tipos `Suit`/`Card`, mazo de 40 cartas, RNG Mulberry32 con semilla, `shuffleDeck` y `dealHands` con tests · `feat(engine): mazo y reparto`
 - 2026-11-16 · Etapa 2 · Jerarquía de Truco (`getTrucoRank` 1..14) y `compareCards` (-1/0/1) con tests · `feat(engine): jerarquia de cartas`
 - 2026-11-16 · Etapa 2 · `getCardEnvidoValue`, `calculateEnvido`, `compareEnvido` y `hasEnvidoPair` en `src/engine/envido.ts` · `feat(engine): calculo de envido`
+- 2026-11-16 · Etapa 2 · Tests exhaustivos: 1600 comparaciones de jerarquía (40×40) y las 9880 manos posibles C(40,3) de envido; cobertura 100 % en `cards.ts`, `envido.ts` y `rng.ts`; cierre con tag `etapa-2` · `test(engine): tests exhaustivos de cartas y envido`
