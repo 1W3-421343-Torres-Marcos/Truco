@@ -97,7 +97,7 @@ describe('getLegalActions y applyAction (Etapa 3.5 y 3.6)', () => {
     { suit: 'basto', number: 4 },
   ];
 
-  it('lista las acciones iniciales legales (3 cartas, cantar truco e irse al mazo)', () => {
+  it('lista las acciones iniciales legales (3 cartas, 3 envidos, cantar truco e irse al mazo)', () => {
     const g0 = withCustomHands(createGame({ targetScore: 15, seed: 1 }), humanCards, botCards);
     const legal = getLegalActions(g0);
 
@@ -105,6 +105,9 @@ describe('getLegalActions y applyAction (Etapa 3.5 y 3.6)', () => {
       { type: 'playCard', card: humanCards[0] },
       { type: 'playCard', card: humanCards[1] },
       { type: 'playCard', card: humanCards[2] },
+      { type: 'callEnvido', call: 'envido' },
+      { type: 'callEnvido', call: 'realEnvido' },
+      { type: 'callEnvido', call: 'faltaEnvido' },
       { type: 'callTruco', level: 'truco' },
       { type: 'foldToMazo' },
     ]);
@@ -258,5 +261,82 @@ describe('getLegalActions y applyAction (Etapa 3.5 y 3.6)', () => {
     state2 = applyAction(state2, { type: 'foldToMazo' });
     expect(state2.scores.human).toBe(15);
     expect(state2.winner).toBe('human');
+  });
+
+  it('resuelve "el envido está primero": ante Truco en 1ª baza permite cantar Envido y luego retoma el Truco', () => {
+    // human tiene 28 de envido (1♠ + 7♠ = 28), bot tiene 0 (tres 4 de distinto palo = 4)
+    let state = withCustomHands(createGame({ targetScore: 30, seed: 9 }), humanCards, botCards);
+
+    // Human canta Truco en 1ª baza
+    state = applyAction(state, { type: 'callTruco', level: 'truco' });
+    expect(state.hand.phase).toBe('awaitingTrucoResponse');
+    expect(getActivePlayer(state.hand)).toBe('bot');
+
+    // Bot responde con Envido ("el envido está primero")
+    expect(isActionLegal(state, { type: 'callEnvido', call: 'envido' })).toBe(true);
+    state = applyAction(state, { type: 'callEnvido', call: 'envido' });
+    expect(state.hand.phase).toBe('awaitingEnvidoResponse');
+    expect(getActivePlayer(state.hand)).toBe('human');
+
+    // Human sube a Real Envido y bot quiere -> gana human (28 vs 4) y suma 5 puntos
+    state = applyAction(state, { type: 'callEnvido', call: 'realEnvido' });
+    expect(getActivePlayer(state.hand)).toBe('bot');
+    state = applyAction(state, { type: 'respondEnvido', response: 'quiero' });
+
+    expect(state.scores.human).toBe(5);
+    expect(state.hand.envido.outcome).toEqual({
+      accepted: true,
+      winner: 'human',
+      points: 5,
+      manoPoints: 28,
+      piePoints: 4,
+    });
+
+    // Como había un Truco pendiente, vuelve a awaitingTrucoResponse para que bot responda al Truco
+    expect(state.hand.phase).toBe('awaitingTrucoResponse');
+    expect(getActivePlayer(state.hand)).toBe('bot');
+    expect(isActionLegal(state, { type: 'callEnvido', call: 'envido' })).toBe(false);
+
+    // Bot dice noQuiero al Truco -> human suma 1 punto más (total 6) y termina la mano
+    state = applyAction(state, { type: 'respondTruco', response: 'noQuiero' });
+    expect(state.scores.human).toBe(6);
+    expect(state.hand.phase).toBe('handEnded');
+  });
+
+  it('finaliza la partida en el acto si el Envido alcanza el puntaje objetivo (Falta Envido o puntos normales)', () => {
+    let state = withCustomHands(createGame({ targetScore: 30, seed: 11 }), humanCards, botCards);
+    state = { ...state, scores: { human: 5, bot: 10 } };
+
+    // En malas (< 15), Falta Envido querida gana el partido entero
+    state = applyAction(state, { type: 'callEnvido', call: 'faltaEnvido' });
+    state = applyAction(state, { type: 'respondEnvido', response: 'quiero' });
+
+    expect(state.scores.human).toBe(30);
+    expect(state.winner).toBe('human');
+    expect(state.hand.phase).toBe('handEnded');
+    expect(state.hand.outcome).toEqual({
+      reason: 'envido',
+      trucoWinner: null,
+      trucoPoints: 0,
+      envidoBonusForMazo: 0,
+    });
+
+    // También si se va al mazo con un envido pendiente: primero cuenta el envido no querido
+    let s2 = withCustomHands(createGame({ targetScore: 15, seed: 12 }), humanCards, botCards);
+    s2 = { ...s2, scores: { human: 14, bot: 14 } };
+    s2 = applyAction(s2, { type: 'callEnvido', call: 'envido' });
+    // Bot se va al mazo con el envido pendiente -> human llega a 15 por el envido y gana antes del truco
+    const s2End = applyAction(s2, { type: 'foldToMazo' });
+    expect(s2End.scores.human).toBe(15);
+    expect(s2End.winner).toBe('human');
+    expect(s2End.hand.outcome?.reason).toBe('envido');
+
+    // Y si al irse al mazo con envido pendiente aún no alcanza el objetivo por el envido, suma envido + mazo
+    let s3 = withCustomHands(createGame({ targetScore: 15, seed: 13 }), humanCards, botCards);
+    s3 = applyAction(s3, { type: 'callEnvido', call: 'envido' });
+    s3 = applyAction(s3, { type: 'foldToMazo' });
+    // 1 de envido no querido + 1 de truco al mazo = 2
+    expect(s3.scores.human).toBe(2);
+    expect(s3.hand.outcome?.reason).toBe('mazo');
   });
 });

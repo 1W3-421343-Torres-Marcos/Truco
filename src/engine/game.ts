@@ -1,5 +1,13 @@
 import { cardId, createDeck, dealHands, shuffleDeck, type Card } from './cards.ts';
-import { createInitialEnvidoState } from './envido.ts';
+import {
+  applyEnvidoCall,
+  calculateEnvido,
+  canPlayerCallEnvidoInHand,
+  compareEnvido,
+  createInitialEnvidoState,
+  getEnvidoAcceptedPoints,
+  getEnvidoDeclinedPoints,
+} from './envido.ts';
 import { createRng } from './rng.ts';
 import { nextTrickLeadPlayer, resolveHandWinnerFromTricks, resolveTrickWinner } from './tricks.ts';
 import {
@@ -13,6 +21,8 @@ import {
 import {
   otherPlayer,
   type Action,
+  type EnvidoOutcome,
+  type EnvidoState,
   type GameState,
   type HandOutcome,
   type HandState,
@@ -153,7 +163,23 @@ export function getLegalActions(state: GameState): Action[] {
 
   const actions: Action[] = [];
 
+  if (hand.phase === 'awaitingEnvidoResponse') {
+    actions.push({ type: 'respondEnvido', response: 'quiero' });
+    actions.push({ type: 'respondEnvido', response: 'noQuiero' });
+
+    for (const call of canPlayerCallEnvidoInHand(hand, activePlayer)) {
+      actions.push({ type: 'callEnvido', call });
+    }
+
+    actions.push({ type: 'foldToMazo' });
+    return actions;
+  }
+
   if (hand.phase === 'awaitingTrucoResponse') {
+    for (const call of canPlayerCallEnvidoInHand(hand, activePlayer)) {
+      actions.push({ type: 'callEnvido', call });
+    }
+
     actions.push({ type: 'respondTruco', response: 'quiero' });
     actions.push({ type: 'respondTruco', response: 'noQuiero' });
 
@@ -169,6 +195,10 @@ export function getLegalActions(state: GameState): Action[] {
   // phase === 'playing'
   for (const card of hand.remainingCards[activePlayer]) {
     actions.push({ type: 'playCard', card });
+  }
+
+  for (const call of canPlayerCallEnvidoInHand(hand, activePlayer)) {
+    actions.push({ type: 'callEnvido', call });
   }
 
   const nextTrucoLevel = canPlayerCallTruco(hand.truco, activePlayer);
@@ -347,6 +377,99 @@ export function applyAction(state: GameState, action: Action): GameState {
   const { hand } = state;
   const activePlayer = getActivePlayer(hand)!;
 
+  if (action.type === 'callEnvido') {
+    const newEnvido = applyEnvidoCall(hand.envido, activePlayer, action.call);
+    return {
+      ...state,
+      hand: {
+        ...hand,
+        envido: newEnvido,
+        envidoCalledInHand: true,
+        phase: 'awaitingEnvidoResponse',
+      },
+    };
+  }
+
+  if (action.type === 'respondEnvido') {
+    const calls = hand.envido.calls.map((c) => c.call);
+    let envidoOutcome: EnvidoOutcome;
+
+    if (action.response === 'noQuiero') {
+      const winner = hand.envido.pendingBy!;
+      const points = getEnvidoDeclinedPoints(calls);
+      envidoOutcome = {
+        accepted: false,
+        winner,
+        points,
+        manoPoints: null,
+        piePoints: null,
+      };
+    } else {
+      const manoPlayer = hand.manoPlayer;
+      const piePlayer = otherPlayer(manoPlayer);
+      const manoPoints = calculateEnvido(hand.dealtCards[manoPlayer]);
+      const piePoints = calculateEnvido(hand.dealtCards[piePlayer]);
+      const winnerRole = compareEnvido(manoPoints, piePoints);
+      const winner = winnerRole === 'mano' ? manoPlayer : piePlayer;
+      const points = getEnvidoAcceptedPoints(calls, state.scores, state.targetScore, winner);
+      envidoOutcome = {
+        accepted: true,
+        winner,
+        points,
+        manoPoints,
+        piePoints,
+      };
+    }
+
+    const newWinnerScore = Math.min(
+      state.targetScore,
+      state.scores[envidoOutcome.winner] + envidoOutcome.points,
+    );
+    const newScores = {
+      ...state.scores,
+      [envidoOutcome.winner]: newWinnerScore,
+    };
+    const resolvedEnvido: EnvidoState = {
+      ...hand.envido,
+      pendingBy: null,
+      outcome: envidoOutcome,
+    };
+
+    if (newWinnerScore >= state.targetScore) {
+      return {
+        ...state,
+        scores: newScores,
+        winner: envidoOutcome.winner,
+        hand: {
+          ...hand,
+          envido: resolvedEnvido,
+          truco: {
+            ...hand.truco,
+            pendingCall: null,
+          },
+          phase: 'handEnded',
+          outcome: {
+            reason: 'envido',
+            trucoWinner: null,
+            trucoPoints: 0,
+            envidoBonusForMazo: 0,
+          },
+        },
+      };
+    }
+
+    const nextPhase = hand.truco.pendingCall !== null ? 'awaitingTrucoResponse' : 'playing';
+    return {
+      ...state,
+      scores: newScores,
+      hand: {
+        ...hand,
+        envido: resolvedEnvido,
+        phase: nextPhase,
+      },
+    };
+  }
+
   if (action.type === 'callTruco') {
     const newTruco = applyTrucoCall(hand.truco, activePlayer, action.level);
     return {
@@ -394,13 +517,59 @@ export function applyAction(state: GameState, action: Action): GameState {
 
   if (action.type === 'foldToMazo') {
     const rival = otherPlayer(activePlayer);
-    const mazo = calculateMazoPoints(hand, activePlayer);
+    let workingState = state;
+    let workingHand = hand;
+
+    // Si había un canto de envido pendiente, primero se resuelve como no querido ("primero envido, después truco")
+    if (hand.phase === 'awaitingEnvidoResponse' && hand.envido.pendingBy !== null) {
+      const calls = hand.envido.calls.map((c) => c.call);
+      const envidoPoints = getEnvidoDeclinedPoints(calls);
+      const envidoOutcome: EnvidoOutcome = {
+        accepted: false,
+        winner: rival,
+        points: envidoPoints,
+        manoPoints: null,
+        piePoints: null,
+      };
+      const newRivalScore = Math.min(state.targetScore, state.scores[rival] + envidoPoints);
+      const newScores = { ...state.scores, [rival]: newRivalScore };
+      const resolvedEnvido: EnvidoState = {
+        ...hand.envido,
+        pendingBy: null,
+        outcome: envidoOutcome,
+      };
+
+      if (newRivalScore >= state.targetScore) {
+        return {
+          ...state,
+          scores: newScores,
+          winner: rival,
+          hand: {
+            ...hand,
+            envido: resolvedEnvido,
+            truco: { ...hand.truco, pendingCall: null },
+            phase: 'handEnded',
+            outcome: {
+              reason: 'envido',
+              trucoWinner: null,
+              trucoPoints: 0,
+              envidoBonusForMazo: 0,
+            },
+          },
+        };
+      }
+
+      workingState = { ...state, scores: newScores };
+      workingHand = { ...hand, envido: resolvedEnvido };
+    }
+
+    const mazo = calculateMazoPoints(workingHand, activePlayer);
     return awardHandAndFinish(
-      state,
+      workingState,
       {
-        ...hand,
+        ...workingHand,
         truco: {
-          ...hand.truco,
+          ...workingHand.truco,
           pendingCall: null,
         },
       },
@@ -413,9 +582,5 @@ export function applyAction(state: GameState, action: Action): GameState {
     );
   }
 
-  if (action.type === 'playCard') {
-    return applyPlayCard(state, activePlayer, action.card);
-  }
-
-  throw new Error(`Acción no soportada: ${action.type}`);
+  return applyPlayCard(state, activePlayer, action.card);
 }
