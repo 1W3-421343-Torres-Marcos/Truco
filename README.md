@@ -3,7 +3,7 @@
 App web/móvil (PWA) para jugar al **Truco argentino 1 vs 1 contra la máquina**, con estética de campo,
 tres niveles de dificultad, partida guardada, historial y estadísticas. 100 % offline, sin backend.
 
-> Estado: en desarrollo por etapas. El avance está en [`docs/PLAN.md`](docs/PLAN.md).
+> Estado: **v1.0.0 completada** (Etapas 0 a 10 finalizadas). El detalle de todas las decisiones, etapas y commits está en [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Requisitos
 
