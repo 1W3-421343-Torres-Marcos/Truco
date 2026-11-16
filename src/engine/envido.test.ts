@@ -8,9 +8,12 @@ import {
   createInitialEnvidoState,
   getAllowedNextEnvidoCalls,
   getCardEnvidoValue,
+  getEnvidoAcceptedBasePoints,
+  getEnvidoDeclinedPoints,
   hasEnvidoPair,
 } from './envido.ts';
 import { createGame } from './game.ts';
+import type { EnvidoCall } from './types.ts';
 
 describe('cálculo de envido (casos puntuales y exhaustivo)', () => {
   it('devuelve el valor individual de envido (1..7 o 0 para figuras)', () => {
@@ -241,5 +244,37 @@ describe('cantos de envido, secuencias y "el envido está primero" (Etapa 4.1)',
     // En 2ª baza ya no se puede iniciar envido
     const inTrick1 = { ...baseHand, currentTrickIndex: 1 as const };
     expect(canPlayerCallEnvidoInHand(inTrick1, 'human')).toEqual([]);
+  });
+
+  it('verifica las 11 filas de la tabla de puntos querido / no querido (Etapa 4.2)', () => {
+    const table: ReadonlyArray<{
+      seq: readonly EnvidoCall[];
+      querido: number | 'falta';
+      noQuerido: number;
+    }> = [
+      { seq: ['envido'], querido: 2, noQuerido: 1 },
+      { seq: ['envido', 'envido'], querido: 4, noQuerido: 2 },
+      { seq: ['realEnvido'], querido: 3, noQuerido: 1 },
+      { seq: ['envido', 'realEnvido'], querido: 5, noQuerido: 2 },
+      { seq: ['envido', 'envido', 'realEnvido'], querido: 7, noQuerido: 4 },
+      { seq: ['faltaEnvido'], querido: 'falta', noQuerido: 1 },
+      { seq: ['envido', 'faltaEnvido'], querido: 'falta', noQuerido: 2 },
+      { seq: ['envido', 'envido', 'faltaEnvido'], querido: 'falta', noQuerido: 4 },
+      { seq: ['realEnvido', 'faltaEnvido'], querido: 'falta', noQuerido: 3 },
+      { seq: ['envido', 'realEnvido', 'faltaEnvido'], querido: 'falta', noQuerido: 5 },
+      {
+        seq: ['envido', 'envido', 'realEnvido', 'faltaEnvido'],
+        querido: 'falta',
+        noQuerido: 7,
+      },
+    ];
+
+    for (const row of table) {
+      expect(getEnvidoAcceptedBasePoints(row.seq)).toBe(row.querido);
+      expect(getEnvidoDeclinedPoints(row.seq)).toBe(row.noQuerido);
+    }
+
+    expect(() => getEnvidoAcceptedBasePoints([])).toThrow(/no puede estar vacía/);
+    expect(() => getEnvidoDeclinedPoints([])).toThrow(/no puede estar vacía/);
   });
 });

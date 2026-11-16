@@ -178,3 +178,46 @@ export function applyEnvidoCall(
     outcome: null,
   };
 }
+
+function getNonFaltaCallPoints(call: EnvidoCall): number {
+  if (call === 'envido') return 2;
+  if (call === 'realEnvido') return 3;
+  throw new Error('faltaEnvido no tiene puntaje fijo sin contexto de marcador');
+}
+
+/**
+ * Calcula los puntos de "no querido" para cualquier secuencia válida de Envido.
+ * Regla general: suma lo querido de la secuencia sin el último canto (o 1 si era el 1º).
+ */
+export function getEnvidoDeclinedPoints(calls: readonly EnvidoCall[]): number {
+  if (calls.length === 0) {
+    throw new Error('La secuencia de envido no puede estar vacía');
+  }
+  if (calls.length === 1) {
+    return 1;
+  }
+  let sum = 0;
+  for (let i = 0; i < calls.length - 1; i++) {
+    sum += getNonFaltaCallPoints(calls[i]!);
+  }
+  return sum;
+}
+
+/**
+ * Calcula los puntos base de "querido" de una secuencia de Envido:
+ * - Si contiene `faltaEnvido`, devuelve `'falta'` (depende del marcador).
+ * - Si no, devuelve la suma (2 por cada `envido`, 3 por `realEnvido`).
+ */
+export function getEnvidoAcceptedBasePoints(calls: readonly EnvidoCall[]): number | 'falta' {
+  if (calls.length === 0) {
+    throw new Error('La secuencia de envido no puede estar vacía');
+  }
+  if (calls.includes('faltaEnvido')) {
+    return 'falta';
+  }
+  let sum = 0;
+  for (const call of calls) {
+    sum += getNonFaltaCallPoints(call);
+  }
+  return sum;
+}
