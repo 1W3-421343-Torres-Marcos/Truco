@@ -1,0 +1,129 @@
+# Plan de desarrollo — Truco Argentino (PWA)
+
+> Documento vivo. Quien continúe el proyecto: leé **Decisiones**, buscá la primera tarea `[ ]`
+> en **Etapas** y revisá el **Registro de progreso** al final.
+> Para ejecutar una etapa en Antigravity usá `/plan` pidiendo "Etapa N de docs/PLAN.md":
+> el Implementation Plan nativo detalla los pasos; este archivo marca el avance global.
+
+## 1. Decisiones tomadas (2026-11-16)
+
+| Tema | Decisión |
+|---|---|
+| Plataforma | PWA instalable en celular. React + Vite + TypeScript |
+| Persistencia | Local (`localStorage`), offline, sin backend ni cuentas |
+| Modalidad | 1 vs 1 contra la máquina |
+| Flor | **No** se juega con Flor |
+| Puntos | Seleccionable: 15 o 30 (30 = malas 0-15 / buenas 15-30) |
+| Falta Envido | En malas gana el partido; en buenas (y a 15) vale lo que le falta al que va ganando |
+| Irse al mazo | En 1ª baza sin envido cantado → rival suma 2 (1 truco + 1 envido no cantado). Si no, lo que valga el truco en juego |
+| "El envido está primero" | Permitido: ante Truco en 1ª baza se puede responder Envido |
+| Dificultad | Fácil / Medio / Difícil, con personaje gaucho distinto por nivel |
+| Personajes | Fácil: "El Pibe" · Medio: "Don Ramón" · Difícil: "El Viejo Vizcacha" |
+| Estética | Campo argentino: mesa de madera, mate, pampa, tipografía criolla. Cartas españolas en SVG propio |
+| Mesa | Las cartas jugadas en bazas anteriores quedan visibles (por baza) durante toda la mano |
+| Extras | Animaciones de reparto/jugada · globos de diálogo + sonidos (voz TTS opcional) · estadísticas · tutorial/reglas · anotador con palitos (fósforos) |
+| Historial | Se guarda cada partida terminada (fecha, dificultad, puntos, resultado, duración) |
+| Partida en curso | Se guarda tras cada acción; al abrir la app se ofrece "Continuar partida" |
+| Git / tests | Repo local, Conventional Commits, ≥1 commit por tarea, tag por etapa. Vitest para engine/ai/persistence |
+
+## 2. Organización de la documentación para agentes
+
+- `AGENTS.md` — reglas siempre activas (stack, arquitectura, prohibiciones). Corto.
+- `.agents/skills/` — documentación técnica bajo demanda, una por módulo:
+  - `truco-reglas` — jerarquía de cartas, envido, truco, pardas, puntuación exacta.
+  - `truco-ia` — diseño de los bots por dificultad.
+  - `persistencia` — esquema de guardado, versiones y migraciones.
+  - `ui-estetica` — paleta, tipografía, cartas SVG, mesa, anotador, animaciones, sonido.
+  - `etapas-y-commits` — procedimiento para cerrar tareas/etapas y commitear.
+- `docs/PLAN.md` — este archivo: decisiones, etapas, progreso.
+
+## 3. Etapas
+
+Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre paréntesis.
+
+### Etapa 0 — Planificación ✅
+- [x] Definir decisiones con el usuario
+- [x] Crear `AGENTS.md`, skills y `docs/PLAN.md` (`docs: plan inicial, reglas y skills`)
+
+### Etapa 1 — Entorno y esqueleto
+> Requisito: Node.js LTS (≥ 20) instalado en la máquina. Hoy **no está instalado**.
+- [ ] Instalar Node.js LTS y verificar `node -v`, `npm -v`
+- [ ] Scaffold Vite React-TS en la raíz (`chore: scaffold vite react-ts`)
+- [ ] ESLint + Prettier + `tsconfig` strict (`chore: lint y formato`)
+- [ ] Vitest + Testing Library + test de humo (`test: configura vitest`)
+- [ ] Estructura de carpetas `src/{engine,ai,persistence,store,ui}` y scripts `lint/test/build` (`chore: estructura de capas`)
+- [ ] `README.md` con cómo correr el proyecto (`docs: readme`)
+- Hecho cuando: `npm run lint && npm test && npm run build` pasa. Tag `etapa-1`.
+
+### Etapa 2 — Engine: cartas y envido
+- [ ] Tipos `Suit`, `Card`, mazo de 40 cartas, RNG con semilla, mezclar y repartir (`feat(engine): mazo y reparto`)
+- [ ] Jerarquía de truco y `compareCards` (`feat(engine): jerarquia de cartas`)
+- [ ] `calculateEnvido(hand)` (`feat(engine): calculo de envido`)
+- [ ] Tests exhaustivos de jerarquía y envido (todas las combinaciones relevantes)
+- Hecho cuando: cobertura de `engine/cards` y `engine/envido` ≥ 95 %. Tag `etapa-2`.
+
+### Etapa 3 — Engine: flujo de la mano y truco
+- [ ] Estado de partida/mano serializable, turnos, mano/pie (`feat(engine): estado de mano`)
+- [ ] Bazas, ganador de baza, reglas de parda completas (`feat(engine): bazas y pardas`)
+- [ ] Truco / Retruco / Vale Cuatro con quién puede subir, quiero / no quiero (`feat(engine): cantos de truco`)
+- [ ] Irse al mazo con la regla decidida (`feat(engine): irse al mazo`)
+- [ ] `getLegalActions(state)` y `applyAction(state, action)` (`feat(engine): acciones legales`)
+- [ ] Tests de todos los escenarios de parda, cantos y mazo
+- Tag `etapa-3`.
+
+### Etapa 4 — Engine: envido en juego y puntuación
+- [ ] Cantos Envido / Real Envido / Falta Envido, secuencias y "el envido está primero" (`feat(engine): cantos de envido`)
+- [ ] Tabla de puntos querido / no querido (`feat(engine): puntos de envido`)
+- [ ] Falta Envido según malas/buenas y partida a 15 (`feat(engine): falta envido`)
+- [ ] Suma de puntos al final de la mano, fin de partida inmediato al llegar al objetivo (`feat(engine): puntuacion y fin de partida`)
+- [ ] Simulación: 10 000 manos aleatorias sin errores ni puntajes inválidos (`test(engine): simulacion masiva`)
+- Tag `etapa-4`. **Punto de control con el usuario: revisar tabla de puntos.**
+
+### Etapa 5 — IA por dificultad
+- [ ] Interfaz `Bot` (`decide(view) => Action`), vista con información oculta (`feat(ai): interfaz de bot`)
+- [ ] Fácil — "El Pibe" (`feat(ai): bot facil`)
+- [ ] Medio — "Don Ramón" (`feat(ai): bot medio`)
+- [ ] Difícil — "El Viejo Vizcacha" (Monte Carlo + mentiras + modelo del rival) (`feat(ai): bot dificil`)
+- [ ] Torneo automático: Difícil > Medio > Fácil en ≥ 1000 partidas (`test(ai): torneo entre bots`)
+- Tag `etapa-5`.
+
+### Etapa 6 — Persistencia
+- [ ] Guardar/cargar partida en curso tras cada acción (`feat(persistence): partida en curso`)
+- [ ] Historial de partidas terminadas (`feat(persistence): historial`)
+- [ ] Estadísticas acumuladas y configuración (`feat(persistence): estadisticas y config`)
+- [ ] Versionado de esquema + migraciones + tolerancia a datos corruptos (`feat(persistence): versionado`)
+- Tag `etapa-6`.
+
+### Etapa 7 — UI funcional (sin estética final)
+- [ ] Store Zustand conectando engine + ai + persistence (`feat(store): store de partida`)
+- [ ] Pantalla inicio: Nueva partida / Continuar / Historial / Estadísticas / Reglas (`feat(ui): pantalla inicio`)
+- [ ] Nueva partida: dificultad + 15/30 (`feat(ui): configuracion de partida`)
+- [ ] Mesa jugable: mano propia, botones de canto, turnos de la máquina (`feat(ui): mesa jugable`)
+- [ ] Cartas de bazas anteriores visibles por baza (`feat(ui): bazas visibles`)
+- [ ] Resumen de mano: envidos mostrados, puntos sumados (`feat(ui): resumen de mano`)
+- [ ] Pantallas historial y estadísticas (`feat(ui): historial y estadisticas`)
+- Hecho cuando: se puede jugar una partida completa de punta a punta. Tag `etapa-7`.
+
+### Etapa 8 — Estética de campo
+- [ ] Paleta, tipografías, fondo de mesa de madera/pampa (`style(ui): tema campero`)
+- [ ] 40 cartas españolas en SVG (componente generado) + dorso (`feat(ui): cartas svg`)
+- [ ] Avatares de los 3 personajes (`feat(ui): personajes`)
+- [ ] Anotador con palitos/fósforos (grupos de 5, malas/buenas) (`feat(ui): anotador de palitos`)
+- [ ] Responsive móvil vertical primero (`style(ui): responsive`)
+- Tag `etapa-8`. **Punto de control con el usuario: aprobación visual.**
+
+### Etapa 9 — Animaciones, sonido y frases
+- [ ] Animación de reparto y de jugar carta (`feat(ui): animaciones`)
+- [ ] Globos de diálogo con frases por personaje (`feat(ui): globos de dialogo`)
+- [ ] Efectos de sonido + voz TTS opcional + botón silencio (`feat(ui): sonido y voz`)
+- Tag `etapa-9`.
+
+### Etapa 10 — Tutorial, PWA y cierre
+- [ ] Reglas y tutorial interactivo dentro de la app (`feat(ui): tutorial y reglas`)
+- [ ] PWA: manifest, íconos, offline (`feat: pwa instalable`)
+- [ ] Accesibilidad básica, QA manual en celular, corrección de bugs (`fix: ...`)
+- [ ] Build final y release (`chore: release v1.0.0`). Tag `v1.0.0`.
+
+## 4. Registro de progreso
+<!-- Una línea por tarea terminada: fecha · etapa · tarea · commit -->
+- 2026-11-16 · Etapa 0 · Decisiones, AGENTS.md, skills y plan · `docs: plan inicial, reglas y skills`
