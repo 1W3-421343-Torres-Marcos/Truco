@@ -1,5 +1,3 @@
-/**
- * Capa persistence: guardado local versionado. Solo depende de engine (tipos).
- * Ver skill `persistencia`. Se implementa en la Etapa 6.
- */
-export {};
+export * from './types.ts';
+export * from './storage.ts';
+export * from './current-game.ts';

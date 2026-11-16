@@ -1,18 +1,19 @@
-import type {
-  Action,
-  Card,
-  EnvidoCallEntry,
-  Hand,
-  HandPhase,
-  PlayerId,
-  Rng,
-  TargetScore,
-  TrickState,
-  TrucoState,
+import {
+  DIFFICULTIES,
+  type Action,
+  type Card,
+  type Difficulty,
+  type EnvidoCallEntry,
+  type Hand,
+  type HandPhase,
+  type PlayerId,
+  type Rng,
+  type TargetScore,
+  type TrickState,
+  type TrucoState,
 } from '../engine/index.ts';
 
-export const DIFFICULTIES = ['facil', 'medio', 'dificil'] as const;
-export type Difficulty = (typeof DIFFICULTIES)[number];
+export { DIFFICULTIES, type Difficulty };
 
 /**
  * Resultado del envido filtrado para un jugador: solo expone los puntos del rival

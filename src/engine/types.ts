@@ -3,6 +3,9 @@ import type { Card, Hand } from './cards.ts';
 export const PLAYERS = ['human', 'bot'] as const;
 export type PlayerId = (typeof PLAYERS)[number];
 
+export const DIFFICULTIES = ['facil', 'medio', 'dificil'] as const;
+export type Difficulty = (typeof DIFFICULTIES)[number];
+
 /**
  * Devuelve el jugador contrario.
  */
