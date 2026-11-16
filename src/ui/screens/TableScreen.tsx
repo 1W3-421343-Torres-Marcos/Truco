@@ -12,14 +12,9 @@ import { SpanishCard } from '../cards/SpanishCard.tsx';
 import { ActionBar } from '../components/ActionBar.tsx';
 import { GauchoAvatar } from '../components/GauchoAvatar.tsx';
 import { HandSummaryModal } from '../components/HandSummaryModal.tsx';
+import { MatchstickScoreboard } from '../components/MatchstickScoreboard.tsx';
 import { TrickBoard } from '../components/TrickBoard.tsx';
 import styles from './TableScreen.module.css';
-
-function formatStageLabel(score: number, target: 15 | 30): string {
-  if (target === 15) return `${score}/15`;
-  if (score < 15) return `${score} malas`;
-  return `${score - 15} buenas (${score})`;
-}
 
 export function TableScreen() {
   const savedGame = useGameStore((s) => s.savedGame);
@@ -75,16 +70,12 @@ export function TableScreen() {
           </div>
         </div>
 
-        <div className={styles.scoreboard} aria-label="Marcador">
-          <div className={styles.scoreItem}>
-            <span>Vos</span>
-            <strong>{formatStageLabel(state.scores.human, state.targetScore)}</strong>
-          </div>
-          <div className={styles.scoreItem}>
-            <span>{character.name}</span>
-            <strong>{formatStageLabel(state.scores.bot, state.targetScore)}</strong>
-          </div>
-        </div>
+        <MatchstickScoreboard
+          humanScore={state.scores.human}
+          botScore={state.scores.bot}
+          targetScore={state.targetScore}
+          rivalName={character.name}
+        />
 
         <button type="button" className={styles.navButton} onClick={() => navigateTo('home')}>
           Menú
