@@ -106,7 +106,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 - [x] Store Zustand conectando engine + ai + persistence (`feat(store): store de partida`)
 - [x] Pantalla inicio: Nueva partida / Continuar / Historial / Estadísticas / Reglas (`feat(ui): pantalla inicio`)
-- [ ] Nueva partida: dificultad + 15/30 (`feat(ui): configuracion de partida`)
+- [x] Nueva partida: dificultad + 15/30 (`feat(ui): configuracion de partida`)
 - [ ] Mesa jugable: mano propia, botones de canto, turnos de la máquina (`feat(ui): mesa jugable`)
 - [ ] Cartas de bazas anteriores visibles por baza (`feat(ui): bazas visibles`)
 - [ ] Resumen de mano: envidos mostrados, puntos sumados (`feat(ui): resumen de mano`)
@@ -172,3 +172,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 6 · Versionado (`CURRENT_SCHEMA_VERSION`), `migrateSavedGamePayload`, `migrateHistoryRecordPayload` y tests de datos corruptos/migraciones; cierre con tag `etapa-6` · `feat(persistence): versionado`
 - 2026-11-16 · Etapa 7 · Store Zustand (`createTrucoStore`, `useGameStore`, `hasResumableGame`) conectando engine + ai + persistence · `feat(store): store de partida`
 - 2026-11-16 · Etapa 7 · Pantalla de inicio (`HomeScreen.tsx`) con Continuar partida, Nueva partida, Historial, Estadísticas, Reglas y controles de audio · `feat(ui): pantalla inicio`
+- 2026-11-16 · Etapa 7 · Pantalla de configuración de nueva partida (`NewGameScreen.tsx`) con selector de personaje/dificultad y 15/30 puntos · `feat(ui): configuracion de partida`

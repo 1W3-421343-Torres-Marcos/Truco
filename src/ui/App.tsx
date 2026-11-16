@@ -1,11 +1,12 @@
 import { useGameStore } from '../store/index.ts';
 import { HomeScreen } from './screens/HomeScreen.tsx';
+import { NewGameScreen } from './screens/NewGameScreen.tsx';
 
 function App() {
   const screen = useGameStore((s) => s.screen);
 
-  if (screen === 'home') {
-    return <HomeScreen />;
+  if (screen === 'newGame') {
+    return <NewGameScreen />;
   }
 
   return <HomeScreen />;
