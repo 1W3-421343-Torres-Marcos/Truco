@@ -53,7 +53,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Instalar Node.js LTS y verificar `node -v`, `npm -v`
 - [x] Scaffold Vite React-TS en la raíz (`chore: scaffold vite react-ts`)
 - [x] ESLint + Prettier + `tsconfig` strict (`chore: lint y formato`)
-- [ ] Vitest + Testing Library + test de humo (`test: configura vitest`)
+- [x] Vitest + Testing Library + test de humo (`test: configura vitest`)
 - [ ] Estructura de carpetas `src/{engine,ai,persistence,store,ui}` y scripts `lint/test/build` (`chore: estructura de capas`)
 - [ ] `README.md` con cómo correr el proyecto (`docs: readme`)
 - Hecho cuando: `npm run lint && npm test && npm run build` pasa. Tag `etapa-1`.
@@ -143,3 +143,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 0 · Decisiones, AGENTS.md, skills y plan · `docs: plan inicial, reglas y skills`
 - 2026-11-16 · Etapa 1 · Node.js LTS 26 instalado + scaffold Vite 8 / React 18 / TS (manual, sin create-vite) · `chore: scaffold vite react-ts`
 - 2026-11-16 · Etapa 1 · ESLint 10 (reglas de capas, engine sin Math.random/Date.now/DOM) + Prettier + TS strict. TypeScript fijado en ~6.0 porque typescript-eslint 8 no soporta TS 7. `npm audit`: 7 moderadas solo en dev (minimatch vía typescript-eslint), aceptadas · `chore: lint y formato`
+- 2026-11-16 · Etapa 1 · Vitest 5 + Testing Library; entorno `node` por defecto, UI con `// @vitest-environment jsdom`; 2 tests de humo · `test: configura vitest`
