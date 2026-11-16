@@ -78,7 +78,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 ### Etapa 4 — Engine: envido en juego y puntuación
 
-- [ ] Cantos Envido / Real Envido / Falta Envido, secuencias y "el envido está primero" (`feat(engine): cantos de envido`)
+- [x] Cantos Envido / Real Envido / Falta Envido, secuencias y "el envido está primero" (`feat(engine): cantos de envido`)
 - [ ] Tabla de puntos querido / no querido (`feat(engine): puntos de envido`)
 - [ ] Falta Envido según malas/buenas y partida a 15 (`feat(engine): falta envido`)
 - [ ] Suma de puntos al final de la mano, fin de partida inmediato al llegar al objetivo (`feat(engine): puntuacion y fin de partida`)
@@ -156,3 +156,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 3 · `canPlayerStillCallEnvido` y `calculateMazoPoints` (incluye +1 por envido no cantado en 1ª baza) con tests · `feat(engine): irse al mazo`
 - 2026-11-16 · Etapa 3 · `getLegalActions`, `isActionLegal` y `applyAction` puros e inmutables en `src/engine/game.ts` · `feat(engine): acciones legales`
 - 2026-11-16 · Etapa 3 · Tests integrales de flujo de mano, pardas, escalera de truco/retruco/valeCuatro y mazo; cierre con tag `etapa-3` · `test(engine): escenarios de parda, truco y mazo`
+- 2026-11-16 · Etapa 4 · Tipos `EnvidoCall`/`EnvidoState`, `getAllowedNextEnvidoCalls`, `canPlayerCallEnvidoInHand` (incluye "el envido está primero") y `applyEnvidoCall` · `feat(engine): cantos de envido`

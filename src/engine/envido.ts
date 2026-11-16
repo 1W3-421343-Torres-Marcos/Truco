@@ -1,4 +1,11 @@
 import { SUITS, type Card, type Suit } from './cards.ts';
+import {
+  otherPlayer,
+  type EnvidoCall,
+  type EnvidoState,
+  type HandState,
+  type PlayerId,
+} from './types.ts';
 
 /**
  * Valor de una carta para el cálculo de Envido:
@@ -60,4 +67,114 @@ export function hasEnvidoPair(cards: readonly Card[]): { paired: boolean; suit: 
     }
   }
   return { paired: false, suit: null };
+}
+
+/**
+ * Crea el estado inicial del Envido para una mano nueva.
+ */
+export function createInitialEnvidoState(): EnvidoState {
+  return {
+    calls: [],
+    pendingBy: null,
+    outcome: null,
+  };
+}
+
+/**
+ * Devuelve los cantos de Envido permitidos para iniciar o subir una secuencia:
+ * - Secuencia vacía: ['envido', 'realEnvido', 'faltaEnvido']
+ * - ['envido']: ['envido', 'realEnvido', 'faltaEnvido']
+ * - ['envido', 'envido']: ['realEnvido', 'faltaEnvido']
+ * - Terminada en 'realEnvido': ['faltaEnvido']
+ * - Terminada en 'faltaEnvido': []
+ */
+export function getAllowedNextEnvidoCalls(calls: readonly EnvidoCall[]): EnvidoCall[] {
+  if (calls.length === 0) {
+    return ['envido', 'realEnvido', 'faltaEnvido'];
+  }
+  const last = calls[calls.length - 1];
+  if (last === 'faltaEnvido') {
+    return [];
+  }
+  if (last === 'realEnvido') {
+    return ['faltaEnvido'];
+  }
+  // last === 'envido'
+  if (calls.length === 1) {
+    return ['envido', 'realEnvido', 'faltaEnvido'];
+  }
+  return ['realEnvido', 'faltaEnvido'];
+}
+
+/**
+ * Determina qué cantos de Envido puede hacer `player` en el estado actual de la mano:
+ * - Si hay un canto de Envido pendiente del rival (`phase === 'awaitingEnvidoResponse'`),
+ *   puede subir con cualquiera de `getAllowedNextEnvidoCalls`.
+ * - Si aún no se cantó Envido en la mano (`!envidoCalledInHand`), estamos en la 1ª baza
+ *   (`currentTrickIndex === 0`) y `player` no tiró su primera carta:
+ *   - Puede iniciar Envido en su turno (`phase === 'playing' && turnPlayer === player`).
+ *   - O puede cantar Envido ante un canto inicial de `truco` en 1ª baza
+ *     (`phase === 'awaitingTrucoResponse' && truco.pendingCall?.level === 'truco'`),
+ *     aplicando la regla "el envido está primero".
+ */
+export function canPlayerCallEnvidoInHand(hand: HandState, player: PlayerId): EnvidoCall[] {
+  if (hand.phase === 'awaitingEnvidoResponse') {
+    if (hand.envido.pendingBy === null || hand.envido.pendingBy === player) {
+      return [];
+    }
+    return getAllowedNextEnvidoCalls(hand.envido.calls.map((c) => c.call));
+  }
+
+  const canInitiate =
+    hand.currentTrickIndex === 0 &&
+    !hand.envidoCalledInHand &&
+    hand.tricks[0].cards[player] === undefined;
+
+  if (!canInitiate) {
+    return [];
+  }
+
+  if (hand.phase === 'playing' && hand.turnPlayer === player) {
+    return getAllowedNextEnvidoCalls([]);
+  }
+
+  if (
+    hand.phase === 'awaitingTrucoResponse' &&
+    hand.truco.pendingCall !== null &&
+    hand.truco.pendingCall.level === 'truco' &&
+    otherPlayer(hand.truco.pendingCall.by) === player
+  ) {
+    return getAllowedNextEnvidoCalls([]);
+  }
+
+  return [];
+}
+
+/**
+ * Registra un nuevo canto de Envido dentro de `EnvidoState`.
+ */
+export function applyEnvidoCall(
+  envido: EnvidoState,
+  player: PlayerId,
+  call: EnvidoCall,
+): EnvidoState {
+  if (envido.outcome !== null) {
+    throw new Error('El envido ya fue resuelto en esta mano');
+  }
+  if (envido.pendingBy === player) {
+    throw new Error(`El jugador ${player} no puede subir su propio canto de envido`);
+  }
+
+  const allowed = getAllowedNextEnvidoCalls(envido.calls.map((c) => c.call));
+  if (!allowed.includes(call)) {
+    throw new Error(
+      `No se puede cantar ${call} después de [${envido.calls.map((c) => c.call).join(', ')}]`,
+    );
+  }
+
+  return {
+    calls: [...envido.calls, { call, by: player }],
+    pendingBy: player,
+    outcome: null,
+  };
 }

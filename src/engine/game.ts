@@ -1,4 +1,5 @@
 import { cardId, createDeck, dealHands, shuffleDeck, type Card } from './cards.ts';
+import { createInitialEnvidoState } from './envido.ts';
 import { createRng } from './rng.ts';
 import { nextTrickLeadPlayer, resolveHandWinnerFromTricks, resolveTrickWinner } from './tricks.ts';
 import {
@@ -68,6 +69,7 @@ export function createHandState(
     ],
     currentTrickIndex: 0,
     truco: createInitialTrucoState(),
+    envido: createInitialEnvidoState(),
     envidoCalledInHand: false,
     phase: 'playing',
     outcome: null,
@@ -126,6 +128,9 @@ export function getActivePlayer(hand: HandState): PlayerId | null {
   if (hand.phase === 'handEnded') {
     return null;
   }
+  if (hand.phase === 'awaitingEnvidoResponse' && hand.envido.pendingBy !== null) {
+    return otherPlayer(hand.envido.pendingBy);
+  }
   if (hand.phase === 'awaitingTrucoResponse' && hand.truco.pendingCall !== null) {
     return otherPlayer(hand.truco.pendingCall.by);
   }
@@ -180,6 +185,12 @@ function actionsEqual(a: Action, b: Action): boolean {
   if (a.type === 'playCard' && b.type === 'playCard') {
     return cardId(a.card) === cardId(b.card);
   }
+  if (a.type === 'callEnvido' && b.type === 'callEnvido') {
+    return a.call === b.call;
+  }
+  if (a.type === 'respondEnvido' && b.type === 'respondEnvido') {
+    return a.response === b.response;
+  }
   if (a.type === 'callTruco' && b.type === 'callTruco') {
     return a.level === b.level;
   }
@@ -196,7 +207,11 @@ export function isActionLegal(state: GameState, action: Action): boolean {
   return getLegalActions(state).some((legal) => actionsEqual(legal, action));
 }
 
-function awardHandAndFinish(state: GameState, hand: HandState, outcome: HandOutcome): GameState {
+function awardHandAndFinish(
+  state: GameState,
+  hand: HandState,
+  outcome: HandOutcome & { readonly trucoWinner: PlayerId },
+): GameState {
   const totalPoints = outcome.trucoPoints + outcome.envidoBonusForMazo;
   const winnerPlayer = outcome.trucoWinner;
   const newWinnerScore = Math.min(state.targetScore, state.scores[winnerPlayer] + totalPoints);
@@ -398,5 +413,9 @@ export function applyAction(state: GameState, action: Action): GameState {
     );
   }
 
-  return applyPlayCard(state, activePlayer, action.card);
+  if (action.type === 'playCard') {
+    return applyPlayCard(state, activePlayer, action.card);
+  }
+
+  throw new Error(`Acción no soportada: ${action.type}`);
 }

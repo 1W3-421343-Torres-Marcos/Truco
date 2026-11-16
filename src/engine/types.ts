@@ -34,14 +34,36 @@ export interface TrucoState {
   readonly quieroOwner: PlayerId | null;
 }
 
+export type EnvidoCall = 'envido' | 'realEnvido' | 'faltaEnvido';
+
+export interface EnvidoCallEntry {
+  readonly call: EnvidoCall;
+  readonly by: PlayerId;
+}
+
+export interface EnvidoOutcome {
+  readonly accepted: boolean;
+  readonly winner: PlayerId;
+  readonly points: number;
+  readonly manoPoints: number | null;
+  readonly piePoints: number | null;
+}
+
+export interface EnvidoState {
+  readonly calls: readonly EnvidoCallEntry[];
+  readonly pendingBy: PlayerId | null;
+  readonly outcome: EnvidoOutcome | null;
+}
+
 export interface HandOutcome {
-  readonly reason: 'baza' | 'trucoNoQuerido' | 'mazo';
-  readonly trucoWinner: PlayerId;
+  readonly reason: 'baza' | 'trucoNoQuerido' | 'mazo' | 'envido';
+  readonly trucoWinner: PlayerId | null;
   readonly trucoPoints: number;
   readonly envidoBonusForMazo: number;
 }
 
-export type HandPhase = 'playing' | 'awaitingTrucoResponse' | 'handEnded';
+export type HandPhase =
+  'playing' | 'awaitingEnvidoResponse' | 'awaitingTrucoResponse' | 'handEnded';
 
 export interface HandState {
   readonly handNumber: number;
@@ -52,6 +74,7 @@ export interface HandState {
   readonly tricks: readonly [TrickState, TrickState, TrickState];
   readonly currentTrickIndex: 0 | 1 | 2;
   readonly truco: TrucoState;
+  readonly envido: EnvidoState;
   readonly envidoCalledInHand: boolean;
   readonly phase: HandPhase;
   readonly outcome: HandOutcome | null;
@@ -67,6 +90,8 @@ export interface GameState {
 
 export type Action =
   | { readonly type: 'playCard'; readonly card: Card }
+  | { readonly type: 'callEnvido'; readonly call: EnvidoCall }
+  | { readonly type: 'respondEnvido'; readonly response: 'quiero' | 'noQuiero' }
   | { readonly type: 'callTruco'; readonly level: TrucoLevel }
   | { readonly type: 'respondTruco'; readonly response: 'quiero' | 'noQuiero' }
   | { readonly type: 'foldToMazo' };

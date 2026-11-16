@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { createDeck, type Card } from './cards.ts';
-import { calculateEnvido, compareEnvido, getCardEnvidoValue, hasEnvidoPair } from './envido.ts';
+import {
+  applyEnvidoCall,
+  calculateEnvido,
+  canPlayerCallEnvidoInHand,
+  compareEnvido,
+  createInitialEnvidoState,
+  getAllowedNextEnvidoCalls,
+  getCardEnvidoValue,
+  hasEnvidoPair,
+} from './envido.ts';
+import { createGame } from './game.ts';
 
 describe('cálculo de envido (casos puntuales y exhaustivo)', () => {
   it('devuelve el valor individual de envido (1..7 o 0 para figuras)', () => {
@@ -156,5 +166,80 @@ describe('cálculo de envido (casos puntuales y exhaustivo)', () => {
       0, 1, 2, 3, 4, 5, 6, 7, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
     ];
     expect([...seenScores].sort((a, b) => a - b)).toEqual(expectedValidScores);
+  });
+});
+
+describe('cantos de envido, secuencias y "el envido está primero" (Etapa 4.1)', () => {
+  it('permite únicamente las subidas válidas según getAllowedNextEnvidoCalls', () => {
+    expect(getAllowedNextEnvidoCalls([])).toEqual(['envido', 'realEnvido', 'faltaEnvido']);
+    expect(getAllowedNextEnvidoCalls(['envido'])).toEqual(['envido', 'realEnvido', 'faltaEnvido']);
+    expect(getAllowedNextEnvidoCalls(['envido', 'envido'])).toEqual(['realEnvido', 'faltaEnvido']);
+    expect(getAllowedNextEnvidoCalls(['realEnvido'])).toEqual(['faltaEnvido']);
+    expect(getAllowedNextEnvidoCalls(['envido', 'realEnvido'])).toEqual(['faltaEnvido']);
+    expect(getAllowedNextEnvidoCalls(['envido', 'envido', 'realEnvido'])).toEqual(['faltaEnvido']);
+    expect(getAllowedNextEnvidoCalls(['faltaEnvido'])).toEqual([]);
+  });
+
+  it('aplica la cadena más larga Envido -> Envido -> Real Envido -> Falta Envido y rechaza cantos inválidos', () => {
+    let e = createInitialEnvidoState();
+    e = applyEnvidoCall(e, 'human', 'envido');
+    expect(() => applyEnvidoCall(e, 'human', 'envido')).toThrow(/propio canto/);
+
+    e = applyEnvidoCall(e, 'bot', 'envido');
+    expect(() => applyEnvidoCall(e, 'human', 'envido')).toThrow(/No se puede cantar envido/);
+
+    e = applyEnvidoCall(e, 'human', 'realEnvido');
+    expect(() => applyEnvidoCall(e, 'bot', 'realEnvido')).toThrow(/No se puede cantar realEnvido/);
+
+    e = applyEnvidoCall(e, 'bot', 'faltaEnvido');
+    expect(e.calls.map((c) => c.call)).toEqual(['envido', 'envido', 'realEnvido', 'faltaEnvido']);
+    expect(() => applyEnvidoCall(e, 'human', 'faltaEnvido')).toThrow(
+      /No se puede cantar faltaEnvido/,
+    );
+
+    const resolved = {
+      ...e,
+      outcome: {
+        accepted: true,
+        winner: 'human' as const,
+        points: 15,
+        manoPoints: 30,
+        piePoints: 25,
+      },
+    };
+    expect(() => applyEnvidoCall(resolved, 'human', 'envido')).toThrow(/ya fue resuelto/);
+  });
+
+  it('habilita canPlayerCallEnvidoInHand en turno normal y ante Truco en 1ª baza ("el envido está primero")', () => {
+    const baseHand = createGame({ targetScore: 30, seed: 50 }).hand;
+
+    // En 1ª baza, turno de human (mano): human puede cantar envido, bot todavía no
+    expect(canPlayerCallEnvidoInHand(baseHand, 'human')).toEqual([
+      'envido',
+      'realEnvido',
+      'faltaEnvido',
+    ]);
+    expect(canPlayerCallEnvidoInHand(baseHand, 'bot')).toEqual([]);
+
+    // Si human canta Truco en 1ª baza, bot puede responder con Envido ("el envido está primero")
+    const trucoPendingInTrick0 = {
+      ...baseHand,
+      phase: 'awaitingTrucoResponse' as const,
+      truco: {
+        acceptedLevel: null,
+        pendingCall: { level: 'truco' as const, by: 'human' as const },
+        quieroOwner: null,
+      },
+    };
+    expect(canPlayerCallEnvidoInHand(trucoPendingInTrick0, 'bot')).toEqual([
+      'envido',
+      'realEnvido',
+      'faltaEnvido',
+    ]);
+    expect(canPlayerCallEnvidoInHand(trucoPendingInTrick0, 'human')).toEqual([]);
+
+    // En 2ª baza ya no se puede iniciar envido
+    const inTrick1 = { ...baseHand, currentTrickIndex: 1 as const };
+    expect(canPlayerCallEnvidoInHand(inTrick1, 'human')).toEqual([]);
   });
 });
