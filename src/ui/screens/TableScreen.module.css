@@ -1,0 +1,151 @@
+.tablePage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: var(--madera);
+  border: 6px solid var(--madera-oscura);
+  box-sizing: border-box;
+  color: var(--crema);
+  gap: 0.65rem;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--madera-oscura);
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+}
+
+.rivalHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.rivalName {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.speechBubble {
+  background-color: var(--crema);
+  color: var(--tinta);
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.scoreboard {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  font-size: 0.92rem;
+  background-color: var(--cuero);
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+}
+
+.scoreItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statusStrip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  background: rgba(43, 29, 14, 0.35);
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+}
+
+.botHandRow {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.cardBack {
+  width: 58px;
+  height: 86px;
+  border-radius: 8px;
+  background-color: var(--madera-oscura);
+  border: 2px solid var(--crema);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.centerZone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.myHandSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.myCardsRow {
+  display: flex;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.cardButton {
+  width: 88px;
+  min-height: 124px;
+  border-radius: 10px;
+  background-color: var(--crema);
+  color: var(--tinta);
+  border: 2px solid var(--madera-oscura);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.5rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cardButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cardCorner {
+  font-size: 1.1rem;
+}
+
+.cardSuit {
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.navButton {
+  min-height: 44px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--crema);
+  background: transparent;
+  color: var(--crema);
+  cursor: pointer;
+  font-size: 0.82rem;
+}

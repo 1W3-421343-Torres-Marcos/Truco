@@ -107,7 +107,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Store Zustand conectando engine + ai + persistence (`feat(store): store de partida`)
 - [x] Pantalla inicio: Nueva partida / Continuar / Historial / Estadísticas / Reglas (`feat(ui): pantalla inicio`)
 - [x] Nueva partida: dificultad + 15/30 (`feat(ui): configuracion de partida`)
-- [ ] Mesa jugable: mano propia, botones de canto, turnos de la máquina (`feat(ui): mesa jugable`)
+- [x] Mesa jugable: mano propia, botones de canto, turnos de la máquina (`feat(ui): mesa jugable`)
 - [ ] Cartas de bazas anteriores visibles por baza (`feat(ui): bazas visibles`)
 - [ ] Resumen de mano: envidos mostrados, puntos sumados (`feat(ui): resumen de mano`)
 - [ ] Pantallas historial y estadísticas (`feat(ui): historial y estadisticas`)
@@ -173,3 +173,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 7 · Store Zustand (`createTrucoStore`, `useGameStore`, `hasResumableGame`) conectando engine + ai + persistence · `feat(store): store de partida`
 - 2026-11-16 · Etapa 7 · Pantalla de inicio (`HomeScreen.tsx`) con Continuar partida, Nueva partida, Historial, Estadísticas, Reglas y controles de audio · `feat(ui): pantalla inicio`
 - 2026-11-16 · Etapa 7 · Pantalla de configuración de nueva partida (`NewGameScreen.tsx`) con selector de personaje/dificultad y 15/30 puntos · `feat(ui): configuracion de partida`
+- 2026-11-16 · Etapa 7 · Mesa jugable (`TableScreen.tsx` y `ActionBar.tsx`) con cartas del jugador, cantos según `getLegalActions` y turnos automáticos del bot · `feat(ui): mesa jugable`

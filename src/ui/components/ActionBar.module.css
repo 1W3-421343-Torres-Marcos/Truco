@@ -1,0 +1,56 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.promptBanner {
+  background-color: #f6e7c1;
+  border: 2px solid var(--madera-oscura);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  font-size: 0.92rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: center;
+}
+
+.actionButton,
+.quieroButton,
+.noQuieroButton,
+.mazoButton {
+  min-height: 44px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid var(--madera-oscura);
+}
+
+.actionButton {
+  background-color: var(--celeste);
+  color: var(--tinta);
+}
+
+.quieroButton {
+  background-color: #3a7d44;
+  color: var(--crema);
+}
+
+.noQuieroButton {
+  background-color: var(--rojo-punzo);
+  color: var(--crema);
+}
+
+.mazoButton {
+  background-color: var(--cuero);
+  color: var(--crema);
+}
