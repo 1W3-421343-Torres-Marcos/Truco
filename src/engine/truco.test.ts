@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { createInitialTrucoState } from './game.ts';
+import { createGame, createInitialTrucoState } from './game.ts';
 import {
   applyTrucoCall,
   applyTrucoQuiero,
+  calculateMazoPoints,
   canPlayerCallTruco,
+  canPlayerStillCallEnvido,
   getNextTrucoLevel,
   getTrucoAcceptedPoints,
   getTrucoDeclinedPoints,
@@ -80,5 +82,78 @@ describe('cantos de truco y posesión del quiero (Etapa 3.3)', () => {
 
     const s1 = applyTrucoCall(s0, 'human', 'truco');
     expect(() => applyTrucoQuiero(s1, 'human')).toThrow(/propio canto/);
+  });
+
+  it('calcula los puntos al irse al mazo según 1ª baza, envido cantado y nivel de truco', () => {
+    const baseHand = createGame({ targetScore: 30, seed: 10 }).hand;
+
+    // 1) En 1ª baza sin envido cantado y sin haber jugado carta -> 1 truco + 1 envido = 2
+    expect(canPlayerStillCallEnvido(baseHand, 'human')).toBe(true);
+    expect(calculateMazoPoints(baseHand, 'human')).toEqual({
+      trucoPoints: 1,
+      envidoBonusForMazo: 1,
+      totalPoints: 2,
+    });
+
+    // 2) En 1ª baza después de haber jugado su primera carta -> solo 1 punto
+    const afterFirstCard = {
+      ...baseHand,
+      tricks: [
+        {
+          ...baseHand.tricks[0],
+          cards: { human: baseHand.dealtCards.human[0] },
+        },
+        baseHand.tricks[1],
+        baseHand.tricks[2],
+      ] as const,
+    };
+    expect(canPlayerStillCallEnvido(afterFirstCard, 'human')).toBe(false);
+    expect(calculateMazoPoints(afterFirstCard, 'human')).toEqual({
+      trucoPoints: 1,
+      envidoBonusForMazo: 0,
+      totalPoints: 1,
+    });
+
+    // 3) En 1ª baza con envido ya cantado -> solo 1 punto
+    const withEnvidoCalled = {
+      ...baseHand,
+      envidoCalledInHand: true,
+    };
+    expect(calculateMazoPoints(withEnvidoCalled, 'human')).toEqual({
+      trucoPoints: 1,
+      envidoBonusForMazo: 0,
+      totalPoints: 1,
+    });
+
+    // 4) En 1ª baza con truco querido, sin envido cantado y sin haber tirado carta -> 2 + 1 = 3
+    const withTrucoAccepted = {
+      ...baseHand,
+      truco: {
+        acceptedLevel: 'truco' as const,
+        pendingCall: null,
+        quieroOwner: 'bot' as const,
+      },
+    };
+    expect(calculateMazoPoints(withTrucoAccepted, 'human')).toEqual({
+      trucoPoints: 2,
+      envidoBonusForMazo: 1,
+      totalPoints: 3,
+    });
+
+    // 5) En 2ª baza con retruco pendiente -> vale como no querido (2) y sin bonus (0)
+    const inSecondTrickPendingRetruco = {
+      ...baseHand,
+      currentTrickIndex: 1 as const,
+      truco: {
+        acceptedLevel: 'truco' as const,
+        pendingCall: { level: 'retruco' as const, by: 'bot' as const },
+        quieroOwner: 'bot' as const,
+      },
+    };
+    expect(calculateMazoPoints(inSecondTrickPendingRetruco, 'human')).toEqual({
+      trucoPoints: 2,
+      envidoBonusForMazo: 0,
+      totalPoints: 2,
+    });
   });
 });

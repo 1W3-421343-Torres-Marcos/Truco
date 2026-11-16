@@ -71,7 +71,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Estado de partida/mano serializable, turnos, mano/pie (`feat(engine): estado de mano`)
 - [x] Bazas, ganador de baza, reglas de parda completas (`feat(engine): bazas y pardas`)
 - [x] Truco / Retruco / Vale Cuatro con quién puede subir, quiero / no quiero (`feat(engine): cantos de truco`)
-- [ ] Irse al mazo con la regla decidida (`feat(engine): irse al mazo`)
+- [x] Irse al mazo con la regla decidida (`feat(engine): irse al mazo`)
 - [ ] `getLegalActions(state)` y `applyAction(state, action)` (`feat(engine): acciones legales`)
 - [ ] Tests de todos los escenarios de parda, cantos y mazo
 - Tag `etapa-3`.
@@ -153,3 +153,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 3 · Tipos `GameState`/`HandState`/`TrickState`/`TrucoState`, `createGame`, `startNextHand` y `getActivePlayer` · `feat(engine): estado de mano`
 - 2026-11-16 · Etapa 3 · `resolveTrickWinner`, `nextTrickLeadPlayer` y `resolveHandWinnerFromTricks` (las 6 reglas de parda) con tests · `feat(engine): bazas y pardas`
 - 2026-11-16 · Etapa 3 · Máquina de estados de Truco (`canPlayerCallTruco`, `applyTrucoCall`, `applyTrucoQuiero`, tablas de puntos) con tests · `feat(engine): cantos de truco`
+- 2026-11-16 · Etapa 3 · `canPlayerStillCallEnvido` y `calculateMazoPoints` (incluye +1 por envido no cantado en 1ª baza) con tests · `feat(engine): irse al mazo`
