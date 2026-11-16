@@ -85,7 +85,7 @@ describe('estado de partida y mano (Etapa 3.1)', () => {
   });
 });
 
-describe('getLegalActions y applyAction (Etapa 3.5)', () => {
+describe('getLegalActions y applyAction (Etapa 3.5 y 3.6)', () => {
   const humanCards: Hand = [
     { suit: 'espada', number: 1 },
     { suit: 'basto', number: 1 },
@@ -117,7 +117,6 @@ describe('getLegalActions y applyAction (Etapa 3.5)', () => {
   it('juega una mano 2-0 preservando las cartas de bazas anteriores y suma puntos', () => {
     let state = withCustomHands(createGame({ targetScore: 15, seed: 1 }), humanCards, botCards);
 
-    // Baza 1: human juega 1 espada, bot juega 4 copa -> gana human
     state = applyAction(state, { type: 'playCard', card: humanCards[0] });
     expect(state.hand.turnPlayer).toBe('bot');
     expect(state.hand.tricks[0].cards.human).toEqual(humanCards[0]);
@@ -127,7 +126,6 @@ describe('getLegalActions y applyAction (Etapa 3.5)', () => {
     expect(state.hand.currentTrickIndex).toBe(1);
     expect(state.hand.turnPlayer).toBe('human');
 
-    // Baza 2: human juega 1 basto, bot juega 4 oro -> gana human 2-0 y termina la mano
     state = applyAction(state, { type: 'playCard', card: humanCards[1] });
     state = applyAction(state, { type: 'playCard', card: botCards[1] });
 
@@ -139,8 +137,126 @@ describe('getLegalActions y applyAction (Etapa 3.5)', () => {
       envidoBonusForMazo: 0,
     });
     expect(state.scores.human).toBe(1);
-    // Ambas bazas siguen visibles en state.hand.tricks
     expect(state.hand.tricks[0].cards).toEqual({ human: humanCards[0], bot: botCards[0] });
     expect(state.hand.tricks[1].cards).toEqual({ human: humanCards[1], bot: botCards[1] });
+  });
+
+  it('resuelve en flujo completo los escenarios de parda (1ª parda, 2ª parda, 3ª parda)', () => {
+    // 1) 1ª parda, 2ª define para bot (termina en 2 bazas)
+    const h1: Hand = [
+      { suit: 'espada', number: 3 },
+      { suit: 'copa', number: 4 },
+      { suit: 'oro', number: 12 },
+    ];
+    const b1: Hand = [
+      { suit: 'oro', number: 3 },
+      { suit: 'espada', number: 1 },
+      { suit: 'basto', number: 4 },
+    ];
+    let s1 = withCustomHands(createGame({ targetScore: 15, seed: 1 }), h1, b1, 'human');
+    s1 = applyAction(s1, { type: 'playCard', card: h1[0] });
+    s1 = applyAction(s1, { type: 'playCard', card: b1[0] });
+    expect(s1.hand.tricks[0].winner).toBe('parda');
+    expect(s1.hand.turnPlayer).toBe('human'); // parda -> sigue saliendo el mano
+
+    s1 = applyAction(s1, { type: 'playCard', card: h1[1] });
+    s1 = applyAction(s1, { type: 'playCard', card: b1[1] });
+    expect(s1.hand.phase).toBe('handEnded');
+    expect(s1.hand.outcome?.trucoWinner).toBe('bot');
+
+    // 2) 1ª ganada por human, 2ª ganada por bot, 3ª parda -> gana human (ganador de 1ª)
+    const h2: Hand = [
+      { suit: 'espada', number: 1 },
+      { suit: 'copa', number: 4 },
+      { suit: 'espada', number: 2 },
+    ];
+    const b2: Hand = [
+      { suit: 'oro', number: 4 },
+      { suit: 'basto', number: 1 },
+      { suit: 'oro', number: 2 },
+    ];
+    let s2 = withCustomHands(createGame({ targetScore: 15, seed: 2 }), h2, b2, 'bot');
+    // Baza 1: sale bot (4 oro), mata human (1 espada)
+    s2 = applyAction(s2, { type: 'playCard', card: b2[0] });
+    s2 = applyAction(s2, { type: 'playCard', card: h2[0] });
+    expect(s2.hand.turnPlayer).toBe('human');
+    // Baza 2: sale human (4 copa), mata bot (1 basto)
+    s2 = applyAction(s2, { type: 'playCard', card: h2[1] });
+    s2 = applyAction(s2, { type: 'playCard', card: b2[1] });
+    expect(s2.hand.turnPlayer).toBe('bot');
+    // Baza 3: sale bot (2 oro), empata human (2 espada) -> gana human por haber ganado la 1ª
+    s2 = applyAction(s2, { type: 'playCard', card: b2[2] });
+    s2 = applyAction(s2, { type: 'playCard', card: h2[2] });
+    expect(s2.hand.phase).toBe('handEnded');
+    expect(s2.hand.outcome?.trucoWinner).toBe('human');
+
+    // 3) Triple parda -> gana el mano ('bot')
+    const h3: Hand = [
+      { suit: 'espada', number: 3 },
+      { suit: 'espada', number: 2 },
+      { suit: 'espada', number: 12 },
+    ];
+    const b3: Hand = [
+      { suit: 'oro', number: 3 },
+      { suit: 'oro', number: 2 },
+      { suit: 'oro', number: 12 },
+    ];
+    let s3 = withCustomHands(createGame({ targetScore: 15, seed: 3 }), h3, b3, 'bot');
+    for (let i = 0; i < 3; i++) {
+      s3 = applyAction(s3, { type: 'playCard', card: b3[i]! });
+      s3 = applyAction(s3, { type: 'playCard', card: h3[i]! });
+    }
+    expect(s3.hand.phase).toBe('handEnded');
+    expect(s3.hand.outcome?.trucoWinner).toBe('bot');
+  });
+
+  it('ejecuta la escalera Truco -> Retruco -> Vale Cuatro y respeta el dueño del quiero', () => {
+    let state = withCustomHands(createGame({ targetScore: 15, seed: 5 }), humanCards, botCards);
+
+    // Human canta truco, bot quiere
+    state = applyAction(state, { type: 'callTruco', level: 'truco' });
+    expect(getActivePlayer(state.hand)).toBe('bot');
+    state = applyAction(state, { type: 'respondTruco', response: 'quiero' });
+    expect(getActivePlayer(state.hand)).toBe('human');
+
+    // En turno de human: human NO puede cantar retruco porque el quiero lo tiene bot
+    expect(isActionLegal(state, { type: 'callTruco', level: 'retruco' })).toBe(false);
+
+    // Human juega su primera carta; ahora es turno de bot, que sí tiene el quiero
+    state = applyAction(state, { type: 'playCard', card: humanCards[0] });
+    expect(isActionLegal(state, { type: 'callTruco', level: 'retruco' })).toBe(true);
+
+    // Bot canta retruco, human sube en el acto a valeCuatro, bot quiere
+    state = applyAction(state, { type: 'callTruco', level: 'retruco' });
+    expect(getActivePlayer(state.hand)).toBe('human');
+    state = applyAction(state, { type: 'callTruco', level: 'valeCuatro' });
+    expect(getActivePlayer(state.hand)).toBe('bot');
+    state = applyAction(state, { type: 'respondTruco', response: 'quiero' });
+
+    // Terminan las bazas y human gana 4 puntos
+    state = applyAction(state, { type: 'playCard', card: botCards[0] });
+    state = applyAction(state, { type: 'playCard', card: humanCards[1] });
+    state = applyAction(state, { type: 'playCard', card: botCards[1] });
+
+    expect(state.hand.outcome?.trucoPoints).toBe(4);
+    expect(state.scores.human).toBe(4);
+  });
+
+  it('otorga los puntos de noQuiero y declara ganador de la partida al llegar a targetScore', () => {
+    let state = withCustomHands(createGame({ targetScore: 15, seed: 8 }), humanCards, botCards);
+    state = { ...state, scores: { human: 14, bot: 10 } };
+
+    state = applyAction(state, { type: 'callTruco', level: 'truco' });
+    state = applyAction(state, { type: 'callTruco', level: 'retruco' });
+    // Human dice noQuiero al retruco -> bot suma 2 puntos (de 10 a 12)
+    const declinedByHuman = applyAction(state, { type: 'respondTruco', response: 'noQuiero' });
+    expect(declinedByHuman.scores.bot).toBe(12);
+    expect(declinedByHuman.winner).toBeNull();
+
+    // Si en cambio human sube a valeCuatro y bot se va al mazo -> human suma 3 (topeado en 15) y gana
+    let state2 = applyAction(state, { type: 'callTruco', level: 'valeCuatro' });
+    state2 = applyAction(state2, { type: 'foldToMazo' });
+    expect(state2.scores.human).toBe(15);
+    expect(state2.winner).toBe('human');
   });
 });

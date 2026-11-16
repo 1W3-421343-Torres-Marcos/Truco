@@ -66,14 +66,14 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Tests exhaustivos de jerarquía y envido (todas las combinaciones relevantes)
 - Hecho cuando: cobertura de `engine/cards` y `engine/envido` ≥ 95 %. Tag `etapa-2`.
 
-### Etapa 3 — Engine: flujo de la mano y truco
+### Etapa 3 — Engine: flujo de la mano y truco ✅
 
 - [x] Estado de partida/mano serializable, turnos, mano/pie (`feat(engine): estado de mano`)
 - [x] Bazas, ganador de baza, reglas de parda completas (`feat(engine): bazas y pardas`)
 - [x] Truco / Retruco / Vale Cuatro con quién puede subir, quiero / no quiero (`feat(engine): cantos de truco`)
 - [x] Irse al mazo con la regla decidida (`feat(engine): irse al mazo`)
 - [x] `getLegalActions(state)` y `applyAction(state, action)` (`feat(engine): acciones legales`)
-- [ ] Tests de todos los escenarios de parda, cantos y mazo
+- [x] Tests de todos los escenarios de parda, cantos y mazo
 - Tag `etapa-3`.
 
 ### Etapa 4 — Engine: envido en juego y puntuación
@@ -155,3 +155,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 3 · Máquina de estados de Truco (`canPlayerCallTruco`, `applyTrucoCall`, `applyTrucoQuiero`, tablas de puntos) con tests · `feat(engine): cantos de truco`
 - 2026-11-16 · Etapa 3 · `canPlayerStillCallEnvido` y `calculateMazoPoints` (incluye +1 por envido no cantado en 1ª baza) con tests · `feat(engine): irse al mazo`
 - 2026-11-16 · Etapa 3 · `getLegalActions`, `isActionLegal` y `applyAction` puros e inmutables en `src/engine/game.ts` · `feat(engine): acciones legales`
+- 2026-11-16 · Etapa 3 · Tests integrales de flujo de mano, pardas, escalera de truco/retruco/valeCuatro y mazo; cierre con tag `etapa-3` · `test(engine): escenarios de parda, truco y mazo`
