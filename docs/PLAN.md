@@ -7,24 +7,24 @@
 
 ## 1. Decisiones tomadas (2026-11-16)
 
-| Tema | Decisión |
-|---|---|
-| Plataforma | PWA instalable en celular. React + Vite + TypeScript |
-| Persistencia | Local (`localStorage`), offline, sin backend ni cuentas |
-| Modalidad | 1 vs 1 contra la máquina |
-| Flor | **No** se juega con Flor |
-| Puntos | Seleccionable: 15 o 30 (30 = malas 0-15 / buenas 15-30) |
-| Falta Envido | En malas gana el partido; en buenas (y a 15) vale lo que le falta al que va ganando |
-| Irse al mazo | En 1ª baza sin envido cantado → rival suma 2 (1 truco + 1 envido no cantado). Si no, lo que valga el truco en juego |
-| "El envido está primero" | Permitido: ante Truco en 1ª baza se puede responder Envido |
-| Dificultad | Fácil / Medio / Difícil, con personaje gaucho distinto por nivel |
-| Personajes | Fácil: "El Pibe" · Medio: "Don Ramón" · Difícil: "El Viejo Vizcacha" |
-| Estética | Campo argentino: mesa de madera, mate, pampa, tipografía criolla. Cartas españolas en SVG propio |
-| Mesa | Las cartas jugadas en bazas anteriores quedan visibles (por baza) durante toda la mano |
-| Extras | Animaciones de reparto/jugada · globos de diálogo + sonidos (voz TTS opcional) · estadísticas · tutorial/reglas · anotador con palitos (fósforos) |
-| Historial | Se guarda cada partida terminada (fecha, dificultad, puntos, resultado, duración) |
-| Partida en curso | Se guarda tras cada acción; al abrir la app se ofrece "Continuar partida" |
-| Git / tests | Repo local, Conventional Commits, ≥1 commit por tarea, tag por etapa. Vitest para engine/ai/persistence |
+| Tema                     | Decisión                                                                                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Plataforma               | PWA instalable en celular. React + Vite + TypeScript                                                                                              |
+| Persistencia             | Local (`localStorage`), offline, sin backend ni cuentas                                                                                           |
+| Modalidad                | 1 vs 1 contra la máquina                                                                                                                          |
+| Flor                     | **No** se juega con Flor                                                                                                                          |
+| Puntos                   | Seleccionable: 15 o 30 (30 = malas 0-15 / buenas 15-30)                                                                                           |
+| Falta Envido             | En malas gana el partido; en buenas (y a 15) vale lo que le falta al que va ganando                                                               |
+| Irse al mazo             | En 1ª baza sin envido cantado → rival suma 2 (1 truco + 1 envido no cantado). Si no, lo que valga el truco en juego                               |
+| "El envido está primero" | Permitido: ante Truco en 1ª baza se puede responder Envido                                                                                        |
+| Dificultad               | Fácil / Medio / Difícil, con personaje gaucho distinto por nivel                                                                                  |
+| Personajes               | Fácil: "El Pibe" · Medio: "Don Ramón" · Difícil: "El Viejo Vizcacha"                                                                              |
+| Estética                 | Campo argentino: mesa de madera, mate, pampa, tipografía criolla. Cartas españolas en SVG propio                                                  |
+| Mesa                     | Las cartas jugadas en bazas anteriores quedan visibles (por baza) durante toda la mano                                                            |
+| Extras                   | Animaciones de reparto/jugada · globos de diálogo + sonidos (voz TTS opcional) · estadísticas · tutorial/reglas · anotador con palitos (fósforos) |
+| Historial                | Se guarda cada partida terminada (fecha, dificultad, puntos, resultado, duración)                                                                 |
+| Partida en curso         | Se guarda tras cada acción; al abrir la app se ofrece "Continuar partida"                                                                         |
+| Git / tests              | Repo local, Conventional Commits, ≥1 commit por tarea, tag por etapa. Vitest para engine/ai/persistence                                           |
 
 ## 2. Organización de la documentación para agentes
 
@@ -42,20 +42,24 @@
 Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre paréntesis.
 
 ### Etapa 0 — Planificación ✅
+
 - [x] Definir decisiones con el usuario
 - [x] Crear `AGENTS.md`, skills y `docs/PLAN.md` (`docs: plan inicial, reglas y skills`)
 
 ### Etapa 1 — Entorno y esqueleto
+
 > Requisito: Node.js LTS (≥ 20). Instalado v26.13.1 / npm 11.20.0 vía `winget install OpenJS.NodeJS.LTS`.
+
 - [x] Instalar Node.js LTS y verificar `node -v`, `npm -v`
 - [x] Scaffold Vite React-TS en la raíz (`chore: scaffold vite react-ts`)
-- [ ] ESLint + Prettier + `tsconfig` strict (`chore: lint y formato`)
+- [x] ESLint + Prettier + `tsconfig` strict (`chore: lint y formato`)
 - [ ] Vitest + Testing Library + test de humo (`test: configura vitest`)
 - [ ] Estructura de carpetas `src/{engine,ai,persistence,store,ui}` y scripts `lint/test/build` (`chore: estructura de capas`)
 - [ ] `README.md` con cómo correr el proyecto (`docs: readme`)
 - Hecho cuando: `npm run lint && npm test && npm run build` pasa. Tag `etapa-1`.
 
 ### Etapa 2 — Engine: cartas y envido
+
 - [ ] Tipos `Suit`, `Card`, mazo de 40 cartas, RNG con semilla, mezclar y repartir (`feat(engine): mazo y reparto`)
 - [ ] Jerarquía de truco y `compareCards` (`feat(engine): jerarquia de cartas`)
 - [ ] `calculateEnvido(hand)` (`feat(engine): calculo de envido`)
@@ -63,6 +67,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - Hecho cuando: cobertura de `engine/cards` y `engine/envido` ≥ 95 %. Tag `etapa-2`.
 
 ### Etapa 3 — Engine: flujo de la mano y truco
+
 - [ ] Estado de partida/mano serializable, turnos, mano/pie (`feat(engine): estado de mano`)
 - [ ] Bazas, ganador de baza, reglas de parda completas (`feat(engine): bazas y pardas`)
 - [ ] Truco / Retruco / Vale Cuatro con quién puede subir, quiero / no quiero (`feat(engine): cantos de truco`)
@@ -72,6 +77,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - Tag `etapa-3`.
 
 ### Etapa 4 — Engine: envido en juego y puntuación
+
 - [ ] Cantos Envido / Real Envido / Falta Envido, secuencias y "el envido está primero" (`feat(engine): cantos de envido`)
 - [ ] Tabla de puntos querido / no querido (`feat(engine): puntos de envido`)
 - [ ] Falta Envido según malas/buenas y partida a 15 (`feat(engine): falta envido`)
@@ -80,6 +86,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - Tag `etapa-4`. **Punto de control con el usuario: revisar tabla de puntos.**
 
 ### Etapa 5 — IA por dificultad
+
 - [ ] Interfaz `Bot` (`decide(view) => Action`), vista con información oculta (`feat(ai): interfaz de bot`)
 - [ ] Fácil — "El Pibe" (`feat(ai): bot facil`)
 - [ ] Medio — "Don Ramón" (`feat(ai): bot medio`)
@@ -88,6 +95,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - Tag `etapa-5`.
 
 ### Etapa 6 — Persistencia
+
 - [ ] Guardar/cargar partida en curso tras cada acción (`feat(persistence): partida en curso`)
 - [ ] Historial de partidas terminadas (`feat(persistence): historial`)
 - [ ] Estadísticas acumuladas y configuración (`feat(persistence): estadisticas y config`)
@@ -95,6 +103,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - Tag `etapa-6`.
 
 ### Etapa 7 — UI funcional (sin estética final)
+
 - [ ] Store Zustand conectando engine + ai + persistence (`feat(store): store de partida`)
 - [ ] Pantalla inicio: Nueva partida / Continuar / Historial / Estadísticas / Reglas (`feat(ui): pantalla inicio`)
 - [ ] Nueva partida: dificultad + 15/30 (`feat(ui): configuracion de partida`)
@@ -105,6 +114,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - Hecho cuando: se puede jugar una partida completa de punta a punta. Tag `etapa-7`.
 
 ### Etapa 8 — Estética de campo
+
 - [ ] Paleta, tipografías, fondo de mesa de madera/pampa (`style(ui): tema campero`)
 - [ ] 40 cartas españolas en SVG (componente generado) + dorso (`feat(ui): cartas svg`)
 - [ ] Avatares de los 3 personajes (`feat(ui): personajes`)
@@ -113,18 +123,23 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - Tag `etapa-8`. **Punto de control con el usuario: aprobación visual.**
 
 ### Etapa 9 — Animaciones, sonido y frases
+
 - [ ] Animación de reparto y de jugar carta (`feat(ui): animaciones`)
 - [ ] Globos de diálogo con frases por personaje (`feat(ui): globos de dialogo`)
 - [ ] Efectos de sonido + voz TTS opcional + botón silencio (`feat(ui): sonido y voz`)
 - Tag `etapa-9`.
 
 ### Etapa 10 — Tutorial, PWA y cierre
+
 - [ ] Reglas y tutorial interactivo dentro de la app (`feat(ui): tutorial y reglas`)
 - [ ] PWA: manifest, íconos, offline (`feat: pwa instalable`)
 - [ ] Accesibilidad básica, QA manual en celular, corrección de bugs (`fix: ...`)
 - [ ] Build final y release (`chore: release v1.0.0`). Tag `v1.0.0`.
 
 ## 4. Registro de progreso
+
 <!-- Una línea por tarea terminada: fecha · etapa · tarea · commit -->
+
 - 2026-11-16 · Etapa 0 · Decisiones, AGENTS.md, skills y plan · `docs: plan inicial, reglas y skills`
 - 2026-11-16 · Etapa 1 · Node.js LTS 26 instalado + scaffold Vite 8 / React 18 / TS (manual, sin create-vite) · `chore: scaffold vite react-ts`
+- 2026-11-16 · Etapa 1 · ESLint 10 (reglas de capas, engine sin Math.random/Date.now/DOM) + Prettier + TS strict. TypeScript fijado en ~6.0 porque typescript-eslint 8 no soporta TS 7. `npm audit`: 7 moderadas solo en dev (minimatch vía typescript-eslint), aceptadas · `chore: lint y formato`
