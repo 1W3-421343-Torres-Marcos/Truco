@@ -1,15 +1,77 @@
 // @vitest-environment jsdom
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { useGameStore } from '../store/index.ts';
 import App from './App.tsx';
 
-describe('App', () => {
-  it('muestra la pantalla de inicio con los botones principales', () => {
+describe('App — Flujo completo de UI funcional (Etapa 7)', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    useGameStore.setState({
+      screen: 'home',
+      savedGame: null,
+      botSpeech: null,
+      history: [],
+    });
+  });
+
+  it('navega entre Inicio, Reglas, Estadísticas e Historial', () => {
     render(<App />);
     expect(screen.getByRole('heading', { name: 'Truco Argentino' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Nueva partida' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Historial' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Estadísticas' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reglas' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reglas' }));
+    expect(screen.getByRole('heading', { name: 'Reglas del Truco' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Estadísticas' }));
+    expect(screen.getByRole('heading', { name: 'Estadísticas' })).toBeInTheDocument();
+    expect(screen.getByText('Partidas jugadas')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Historial' }));
+    expect(screen.getByRole('heading', { name: 'Historial de partidas' })).toBeInTheDocument();
+    expect(screen.getByText('Todavía no hay partidas terminadas.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
+  });
+
+  it('configura nueva partida, juega en la mesa viendo las 3 bazas, muestra resumen de mano y permite continuar partida', () => {
+    render(<App />);
+
+    // Ir a Nueva partida y elegir El Viejo Vizcacha a 15 puntos
+    fireEvent.click(screen.getByRole('button', { name: 'Nueva partida' }));
+    expect(screen.getByRole('heading', { name: 'Nueva partida' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /El Viejo Vizcacha/i }));
+    fireEvent.click(screen.getByRole('button', { name: /A 15 puntos/i }));
+    fireEvent.click(screen.getByRole('button', { name: '¡Repartir!' }));
+
+    // Estamos en la mesa: se ven las 3 bazas (Baza 1, Baza 2, Baza 3) y los botones de acción
+    expect(screen.getByRole('main', { name: 'Mesa de Truco' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Baza 1')).toBeInTheDocument();
+    expect(screen.getByLabelText('Baza 2')).toBeInTheDocument();
+    expect(screen.getByLabelText('Baza 3')).toBeInTheDocument();
+
+    // Irse al mazo en la 1ª mano -> aparece el modal de Resumen de la mano
+    fireEvent.click(screen.getByRole('button', { name: 'Irse al mazo' }));
+    expect(screen.getByRole('dialog', { name: 'Resumen de la mano' })).toBeInTheDocument();
+    expect(screen.getByText(/Te fuiste al mazo/i)).toBeInTheDocument();
+
+    // Pasar a la siguiente mano
+    fireEvent.click(screen.getByRole('button', { name: 'Siguiente mano' }));
+    expect(screen.getByText(/Mano #2/i)).toBeInTheDocument();
+
+    // Volver al menú principal -> aparece el botón "Continuar partida"
+    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
+    expect(screen.getByRole('button', { name: 'Continuar partida' })).toBeInTheDocument();
+
+    // Si abrimos Nueva partida teniendo una en curso, avisa que se abandonará
+    fireEvent.click(screen.getByRole('button', { name: 'Nueva partida' }));
+    expect(screen.getByRole('alert')).toHaveTextContent(/Tenés una partida en curso/i);
+    fireEvent.click(screen.getByRole('button', { name: '¡Repartir!' }));
+
+    // Al haber empezado otra, la anterior quedó en el historial como abandonada
+    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Historial' }));
+    expect(screen.getByText(/Abandonada \(Derrota\)/i)).toBeInTheDocument();
   });
 });

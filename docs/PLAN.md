@@ -102,7 +102,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Versionado de esquema + migraciones + tolerancia a datos corruptos (`feat(persistence): versionado`)
 - Tag `etapa-6`.
 
-### Etapa 7 — UI funcional (sin estética final)
+### Etapa 7 — UI funcional (sin estética final) ✅
 
 - [x] Store Zustand conectando engine + ai + persistence (`feat(store): store de partida`)
 - [x] Pantalla inicio: Nueva partida / Continuar / Historial / Estadísticas / Reglas (`feat(ui): pantalla inicio`)
@@ -110,7 +110,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Mesa jugable: mano propia, botones de canto, turnos de la máquina (`feat(ui): mesa jugable`)
 - [x] Cartas de bazas anteriores visibles por baza (`feat(ui): bazas visibles`)
 - [x] Resumen de mano: envidos mostrados, puntos sumados (`feat(ui): resumen de mano`)
-- [ ] Pantallas historial y estadísticas (`feat(ui): historial y estadisticas`)
+- [x] Pantallas historial y estadísticas (`feat(ui): historial y estadisticas`)
 - Hecho cuando: se puede jugar una partida completa de punta a punta. Tag `etapa-7`.
 
 ### Etapa 8 — Estética de campo
@@ -176,3 +176,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 7 · Mesa jugable (`TableScreen.tsx` y `ActionBar.tsx`) con cartas del jugador, cantos según `getLegalActions` y turnos automáticos del bot · `feat(ui): mesa jugable`
 - 2026-11-16 · Etapa 7 · Tablero de 3 bazas siempre visibles (`TrickBoard.tsx`) con cartas jugadas por baza y estado · `feat(ui): bazas visibles`
 - 2026-11-16 · Etapa 7 · Modal/resumen de fin de mano y fin de partida (`HandSummaryModal.tsx`) con tantos de envido y desglose de puntos · `feat(ui): resumen de mano`
+- 2026-11-16 · Etapa 7 · Pantallas de Historial (`HistoryScreen.tsx`), Estadísticas (`StatsScreen.tsx`) y Reglas (`RulesScreen.tsx`) + tests de integración de UI; cierre con tag `etapa-7` · `feat(ui): historial y estadisticas`
