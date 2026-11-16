@@ -94,12 +94,12 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Torneo automático: Difícil > Medio > Fácil en ≥ 1000 partidas (`test(ai): torneo entre bots`)
 - Tag `etapa-5`.
 
-### Etapa 6 — Persistencia
+### Etapa 6 — Persistencia ✅
 
 - [x] Guardar/cargar partida en curso tras cada acción (`feat(persistence): partida en curso`)
 - [x] Historial de partidas terminadas (`feat(persistence): historial`)
 - [x] Estadísticas acumuladas y configuración (`feat(persistence): estadisticas y config`)
-- [ ] Versionado de esquema + migraciones + tolerancia a datos corruptos (`feat(persistence): versionado`)
+- [x] Versionado de esquema + migraciones + tolerancia a datos corruptos (`feat(persistence): versionado`)
 - Tag `etapa-6`.
 
 ### Etapa 7 — UI funcional (sin estética final)
@@ -169,3 +169,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 6 · `StorageAdapter`, `saveCurrentGame`, `loadCurrentGame` y `clearCurrentGame` en `src/persistence` · `feat(persistence): partida en curso`
 - 2026-11-16 · Etapa 6 · Historial de partidas (`loadHistory`, `appendGameRecord`, `createGameRecordFromSavedGame`, tope 500) · `feat(persistence): historial`
 - 2026-11-16 · Etapa 6 · Estadísticas (`Stats`, `accumulateHandCounters`, `finishAndPersistGame`) y configuración (`Settings`) · `feat(persistence): estadisticas y config`
+- 2026-11-16 · Etapa 6 · Versionado (`CURRENT_SCHEMA_VERSION`), `migrateSavedGamePayload`, `migrateHistoryRecordPayload` y tests de datos corruptos/migraciones; cierre con tag `etapa-6` · `feat(persistence): versionado`

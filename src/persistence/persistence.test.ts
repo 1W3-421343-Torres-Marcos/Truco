@@ -22,7 +22,8 @@ import {
   loadStats,
   saveSettings,
 } from './stats-settings.ts';
-import { createMemoryStorage } from './storage.ts';
+import { migrateHistoryRecordPayload, migrateSavedGamePayload } from './migrations.ts';
+import { createMemoryStorage, safeRemoveKey, safeWriteJson } from './storage.ts';
 import { STORAGE_KEYS, type GameRecord } from './types.ts';
 
 describe('persistencia de partida en curso (Etapa 6.1)', () => {
@@ -199,5 +200,113 @@ describe('estadísticas acumuladas y configuración (Etapa 6.3)', () => {
     };
     expect(saveSettings(custom, storage)).toBe(true);
     expect(loadSettings(storage)).toEqual(custom);
+  });
+});
+
+describe('versionado, migraciones y tolerancia a datos corruptos (Etapa 6.4)', () => {
+  it('migra automáticamente partidas guardadas en esquema v0 a v1 y soporta migración de ejemplo v1 -> v2', () => {
+    const storage = createMemoryStorage();
+    const state = createGame({ targetScore: 30, seed: 88 });
+
+    // Guardado v0 sin schemaVersion ni matchCounters
+    storage.setItem(
+      STORAGE_KEYS.current,
+      JSON.stringify({
+        id: 'legacy-v0',
+        startedAt: '2026-11-16T10:00:00.000Z',
+        difficulty: 'facil',
+        seed: 88,
+        state,
+      }),
+    );
+
+    const loaded = loadCurrentGame(storage);
+    expect(loaded).not.toBeNull();
+    expect(loaded?.schemaVersion).toBe(1);
+    expect(loaded?.matchCounters).toEqual({
+      envidosPlayed: 0,
+      envidosWon: 0,
+      trucosPlayed: 0,
+      trucosWon: 0,
+    });
+
+    // Migración de ejemplo v1 -> v2
+    const migratedToV2 = migrateSavedGamePayload(loaded, {
+      targetVersion: 2,
+      migrations: {
+        1: (payload) => ({
+          ...payload,
+          migratedTag: 'v2-ready',
+        }),
+      },
+    });
+    expect(migratedToV2?.schemaVersion).toBe(2);
+    expect(migratedToV2?.migratedTag).toBe('v2-ready');
+
+    // Versión futura desconocida (v99) -> devuelve null y se descarta al cargar
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    storage.setItem(STORAGE_KEYS.current, JSON.stringify({ ...loaded, schemaVersion: 99 }));
+    expect(loadCurrentGame(storage)).toBeNull();
+    warnSpy.mockRestore();
+  });
+
+  it('migra registros antiguos del historial y tolera fallos o datos corruptos en todas las claves', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Registro antiguo sin durationSec, handsPlayed ni abandoned
+    const legacyRecord = migrateHistoryRecordPayload({
+      id: 'old-1',
+      startedAt: '2026-11-16T09:00:00.000Z',
+      difficulty: 'medio',
+      target: 30,
+      finalScore: { human: 30, bot: 22 },
+      winner: 'human',
+    });
+    expect(legacyRecord).toEqual({
+      id: 'old-1',
+      startedAt: '2026-11-16T09:00:00.000Z',
+      endedAt: '2026-11-16T09:00:00.000Z',
+      durationSec: 0,
+      difficulty: 'medio',
+      target: 30,
+      finalScore: { human: 30, bot: 22 },
+      winner: 'human',
+      handsPlayed: 1,
+      abandoned: false,
+    });
+
+    const storage = createMemoryStorage({
+      [STORAGE_KEYS.history]: JSON.stringify([legacyRecord, { broken: true }]),
+      [STORAGE_KEYS.stats]: JSON.stringify({ gamesPlayed: -5 }),
+      [STORAGE_KEYS.settings]: JSON.stringify({ soundEnabled: 'invalid' }),
+    });
+
+    // Filtra el registro roto y conserva el migrado
+    expect(loadHistory(storage)).toEqual([legacyRecord]);
+    // Stats y Settings corruptos vuelven a sus valores iniciales sin romper
+    expect(loadStats(storage)).toEqual(createInitialStats());
+    expect(loadSettings(storage)).toEqual(DEFAULT_SETTINGS);
+
+    // Historial que no es un array
+    storage.setItem(STORAGE_KEYS.history, JSON.stringify({ notAnArray: true }));
+    expect(loadHistory(storage)).toEqual([]);
+
+    // Adaptador que lanza excepción (ej. QuotaExceededError)
+    const throwingStorage = {
+      getItem(): string | null {
+        throw new Error('SecurityError');
+      },
+      setItem(): void {
+        throw new Error('QuotaExceededError');
+      },
+      removeItem(): void {
+        throw new Error('SecurityError');
+      },
+    };
+    expect(safeWriteJson('any', { a: 1 }, throwingStorage)).toBe(false);
+    expect(() => safeRemoveKey('any', throwingStorage)).not.toThrow();
+    expect(loadCurrentGame(throwingStorage)).toBeNull();
+
+    warnSpy.mockRestore();
   });
 });

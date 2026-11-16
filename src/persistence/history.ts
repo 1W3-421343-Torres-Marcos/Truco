@@ -1,5 +1,6 @@
 import { PLAYERS } from '../engine/index.ts';
 import { isDifficulty, isRecordObject } from './current-game.ts';
+import { migrateHistoryRecordPayload } from './migrations.ts';
 import { getDefaultStorage, safeReadJson, safeRemoveKey, safeWriteJson } from './storage.ts';
 import { STORAGE_KEYS, type GameRecord, type SavedGame, type StorageAdapter } from './types.ts';
 
@@ -38,7 +39,13 @@ export function loadHistory(storage: StorageAdapter = getDefaultStorage()): Game
     return [];
   }
 
-  const valid = raw.filter(isValidGameRecord);
+  const valid: GameRecord[] = [];
+  for (const item of raw) {
+    const migrated = migrateHistoryRecordPayload(item);
+    if (migrated !== null) {
+      valid.push(migrated);
+    }
+  }
   if (valid.length !== raw.length) {
     console.warn('[persistence] Se filtraron registros corruptos del historial.');
     safeWriteJson(STORAGE_KEYS.history, valid.slice(0, MAX_HISTORY_RECORDS), storage);

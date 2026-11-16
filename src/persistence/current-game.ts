@@ -1,4 +1,5 @@
 import { DIFFICULTIES, PLAYERS, type Difficulty, type GameState } from '../engine/index.ts';
+import { migrateSavedGamePayload } from './migrations.ts';
 import { getDefaultStorage, safeReadJson, safeRemoveKey, safeWriteJson } from './storage.ts';
 import {
   CURRENT_SCHEMA_VERSION,
@@ -125,12 +126,13 @@ export function loadCurrentGame(storage: StorageAdapter = getDefaultStorage()): 
   if (raw === null) {
     return null;
   }
-  if (!isValidSavedGame(raw)) {
-    console.warn('[persistence] Partida en curso inválida o de otra versión; se descarta.');
+  const migrated = migrateSavedGamePayload(raw);
+  if (migrated === null || !isValidSavedGame(migrated)) {
+    console.warn('[persistence] Partida en curso inválida o no migrable; se descarta.');
     safeRemoveKey(STORAGE_KEYS.current, storage);
     return null;
   }
-  return raw;
+  return migrated;
 }
 
 /**
