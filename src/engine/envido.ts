@@ -5,6 +5,7 @@ import {
   type EnvidoState,
   type HandState,
   type PlayerId,
+  type TargetScore,
 } from './types.ts';
 
 /**
@@ -220,4 +221,50 @@ export function getEnvidoAcceptedBasePoints(calls: readonly EnvidoCall[]): numbe
     sum += getNonFaltaCallPoints(call);
   }
   return sum;
+}
+
+/**
+ * Calcula cuántos puntos vale la Falta Envido:
+ * - Partida a 30 con el puntero en malas (< 15): quien gana el envido gana el partido
+ *   (suma lo que le falta al ganador para llegar a 30, o 30 si no se especifica ganador).
+ * - Partida a 30 con el puntero en buenas (>= 15): vale `30 - puntaje del que va ganando`.
+ * - Partida a 15: vale `15 - puntaje del que va ganando`.
+ */
+export function calculateFaltaEnvidoPoints(
+  scores: Readonly<Record<PlayerId, number>>,
+  targetScore: TargetScore,
+  envidoWinner?: PlayerId,
+): number {
+  const leaderScore = Math.max(scores.human, scores.bot);
+
+  if (targetScore === 15) {
+    return 15 - leaderScore;
+  }
+
+  // Partida a 30: buenas (>= 15)
+  if (leaderScore >= 15) {
+    return 30 - leaderScore;
+  }
+
+  // Partida a 30: malas (< 15) -> gana el partido entero
+  if (envidoWinner !== undefined) {
+    return 30 - scores[envidoWinner];
+  }
+  return 30;
+}
+
+/**
+ * Calcula los puntos de "querido" de una secuencia de Envido resolviendo Falta Envido si aplica.
+ */
+export function getEnvidoAcceptedPoints(
+  calls: readonly EnvidoCall[],
+  scores: Readonly<Record<PlayerId, number>>,
+  targetScore: TargetScore,
+  envidoWinner?: PlayerId,
+): number {
+  const base = getEnvidoAcceptedBasePoints(calls);
+  if (base === 'falta') {
+    return calculateFaltaEnvidoPoints(scores, targetScore, envidoWinner);
+  }
+  return base;
 }

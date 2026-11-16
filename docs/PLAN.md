@@ -80,7 +80,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 - [x] Cantos Envido / Real Envido / Falta Envido, secuencias y "el envido está primero" (`feat(engine): cantos de envido`)
 - [x] Tabla de puntos querido / no querido (`feat(engine): puntos de envido`)
-- [ ] Falta Envido según malas/buenas y partida a 15 (`feat(engine): falta envido`)
+- [x] Falta Envido según malas/buenas y partida a 15 (`feat(engine): falta envido`)
 - [ ] Suma de puntos al final de la mano, fin de partida inmediato al llegar al objetivo (`feat(engine): puntuacion y fin de partida`)
 - [ ] Simulación: 10 000 manos aleatorias sin errores ni puntajes inválidos (`test(engine): simulacion masiva`)
 - Tag `etapa-4`. **Punto de control con el usuario: revisar tabla de puntos.**
@@ -158,3 +158,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 3 · Tests integrales de flujo de mano, pardas, escalera de truco/retruco/valeCuatro y mazo; cierre con tag `etapa-3` · `test(engine): escenarios de parda, truco y mazo`
 - 2026-11-16 · Etapa 4 · Tipos `EnvidoCall`/`EnvidoState`, `getAllowedNextEnvidoCalls`, `canPlayerCallEnvidoInHand` (incluye "el envido está primero") y `applyEnvidoCall` · `feat(engine): cantos de envido`
 - 2026-11-16 · Etapa 4 · `getEnvidoAcceptedBasePoints` y `getEnvidoDeclinedPoints` con test de las 11 filas oficiales · `feat(engine): puntos de envido`
+- 2026-11-16 · Etapa 4 · `calculateFaltaEnvidoPoints` (malas/buenas a 30 y partida a 15) y `getEnvidoAcceptedPoints` con tests · `feat(engine): falta envido`

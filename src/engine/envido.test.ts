@@ -3,12 +3,14 @@ import { createDeck, type Card } from './cards.ts';
 import {
   applyEnvidoCall,
   calculateEnvido,
+  calculateFaltaEnvidoPoints,
   canPlayerCallEnvidoInHand,
   compareEnvido,
   createInitialEnvidoState,
   getAllowedNextEnvidoCalls,
   getCardEnvidoValue,
   getEnvidoAcceptedBasePoints,
+  getEnvidoAcceptedPoints,
   getEnvidoDeclinedPoints,
   hasEnvidoPair,
 } from './envido.ts';
@@ -276,5 +278,26 @@ describe('cantos de envido, secuencias y "el envido está primero" (Etapa 4.1)',
 
     expect(() => getEnvidoAcceptedBasePoints([])).toThrow(/no puede estar vacía/);
     expect(() => getEnvidoDeclinedPoints([])).toThrow(/no puede estar vacía/);
+  });
+
+  it('calcula Falta Envido en malas (a 30), en buenas (a 30) y en partida a 15 (Etapa 4.3)', () => {
+    // Partida a 30 con el puntero en malas (< 15): quien gana se lleva el partido
+    expect(calculateFaltaEnvidoPoints({ human: 8, bot: 14 }, 30, 'human')).toBe(22);
+    expect(calculateFaltaEnvidoPoints({ human: 8, bot: 14 }, 30, 'bot')).toBe(16);
+    expect(calculateFaltaEnvidoPoints({ human: 0, bot: 0 }, 30)).toBe(30);
+
+    // Partida a 30 con el puntero en buenas (>= 15): vale lo que le falta al puntero
+    expect(calculateFaltaEnvidoPoints({ human: 15, bot: 10 }, 30, 'bot')).toBe(15);
+    expect(calculateFaltaEnvidoPoints({ human: 18, bot: 24 }, 30, 'human')).toBe(6);
+
+    // Partida a 15: siempre vale lo que le falta al que va ganando
+    expect(calculateFaltaEnvidoPoints({ human: 0, bot: 0 }, 15, 'human')).toBe(15);
+    expect(calculateFaltaEnvidoPoints({ human: 5, bot: 11 }, 15, 'human')).toBe(4);
+
+    // getEnvidoAcceptedPoints combina secuencias normales y secuencias con Falta
+    expect(getEnvidoAcceptedPoints(['envido', 'realEnvido'], { human: 10, bot: 20 }, 30)).toBe(5);
+    expect(
+      getEnvidoAcceptedPoints(['envido', 'faltaEnvido'], { human: 10, bot: 20 }, 30, 'human'),
+    ).toBe(10);
   });
 });
