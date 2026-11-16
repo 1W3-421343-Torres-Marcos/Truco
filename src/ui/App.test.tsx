@@ -23,7 +23,13 @@ describe('App — Flujo completo de UI funcional (Etapa 7)', () => {
     expect(screen.getByRole('heading', { name: 'Truco Argentino' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Reglas' }));
-    expect(screen.getByRole('heading', { name: 'Reglas del Truco' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Reglas y Tutorial' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Tutorial Interactivo' }));
+    expect(screen.getByText(/Lección 1: Las cartas bravas/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Con el 7 de espada/i }));
+    expect(screen.getByRole('status')).toHaveTextContent(/¡Exacto!/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Siguiente lección' }));
+    expect(screen.getByText(/Lección 2: Cómo sumar el Envido/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Estadísticas' }));

@@ -131,7 +131,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 ### Etapa 10 — Tutorial, PWA y cierre
 
-- [ ] Reglas y tutorial interactivo dentro de la app (`feat(ui): tutorial y reglas`)
+- [x] Reglas y tutorial interactivo dentro de la app (`feat(ui): tutorial y reglas`)
 - [ ] PWA: manifest, íconos, offline (`feat: pwa instalable`)
 - [ ] Accesibilidad básica, QA manual en celular, corrección de bugs (`fix: ...`)
 - [ ] Build final y release (`chore: release v1.0.0`). Tag `v1.0.0`.
@@ -185,3 +185,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 9 · Animaciones con `motion` (reparto escalonado 80 ms, vuelo de carta a baza, volteo final de cartas del bot y fósforo nuevo) con soporte `prefers-reduced-motion` · `feat(ui): animaciones`
 - 2026-11-16 · Etapa 9 · Componente `<SpeechBubble />` animado para frases del personaje y cantos del jugador · `feat(ui): globos de dialogo`
 - 2026-11-16 · Etapa 9 · Efectos de sonido con Web Audio API + voz opcional `speechSynthesis` (`sound-effects.ts`) y botón de silencio en mesa; cierre con tag `etapa-9` · `feat(ui): sonido y voz`
+- 2026-11-16 · Etapa 10 · Reglas ilustradas con cartas SVG y tutorial interactivo de 4 lecciones (`RulesScreen.tsx`) · `feat(ui): tutorial y reglas`
