@@ -76,13 +76,13 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Tests de todos los escenarios de parda, cantos y mazo
 - Tag `etapa-3`.
 
-### Etapa 4 — Engine: envido en juego y puntuación
+### Etapa 4 — Engine: envido en juego y puntuación ✅
 
 - [x] Cantos Envido / Real Envido / Falta Envido, secuencias y "el envido está primero" (`feat(engine): cantos de envido`)
 - [x] Tabla de puntos querido / no querido (`feat(engine): puntos de envido`)
 - [x] Falta Envido según malas/buenas y partida a 15 (`feat(engine): falta envido`)
 - [x] Suma de puntos al final de la mano, fin de partida inmediato al llegar al objetivo (`feat(engine): puntuacion y fin de partida`)
-- [ ] Simulación: 10 000 manos aleatorias sin errores ni puntajes inválidos (`test(engine): simulacion masiva`)
+- [x] Simulación: 10 000 manos aleatorias sin errores ni puntajes inválidos (`test(engine): simulacion masiva`)
 - Tag `etapa-4`. **Punto de control con el usuario: revisar tabla de puntos.**
 
 ### Etapa 5 — IA por dificultad
@@ -160,3 +160,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 4 · `getEnvidoAcceptedBasePoints` y `getEnvidoDeclinedPoints` con test de las 11 filas oficiales · `feat(engine): puntos de envido`
 - 2026-11-16 · Etapa 4 · `calculateFaltaEnvidoPoints` (malas/buenas a 30 y partida a 15) y `getEnvidoAcceptedPoints` con tests · `feat(engine): falta envido`
 - 2026-11-16 · Etapa 4 · Integración de `callEnvido`/`respondEnvido` en `game.ts`, "el envido está primero" y fin de partida inmediato al alcanzar `targetScore` · `feat(engine): puntuacion y fin de partida`
+- 2026-11-16 · Etapa 4 · Simulación masiva de 10 000 manos aleatorias (a 15 y a 30 puntos) sin errores ni puntajes inválidos; cierre con tag `etapa-4` · `test(engine): simulacion masiva`
