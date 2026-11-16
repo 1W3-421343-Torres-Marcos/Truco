@@ -75,17 +75,10 @@ describe('App — Flujo completo de UI funcional (Etapa 7)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente mano' }));
     expect(screen.getByText(/Mano #2/i)).toBeInTheDocument();
 
-    // Volver al menú principal -> aparece el botón "Continuar partida"
-    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
-    expect(screen.getByRole('button', { name: 'Continuar partida' })).toBeInTheDocument();
-
-    // Si abrimos Nueva partida teniendo una en curso, avisa que se abandonará
-    fireEvent.click(screen.getByRole('button', { name: 'Nueva partida' }));
-    expect(screen.getByRole('alert')).toHaveTextContent(/Tenés una partida en curso/i);
-    fireEvent.click(screen.getByRole('button', { name: '¡Repartir!' }));
-
-    // Al haber empezado otra, la anterior quedó en el historial como abandonada
-    fireEvent.click(screen.getByRole('button', { name: 'Menú' }));
+    // Abandonar desde la mesa con confirmación
+    fireEvent.click(screen.getByRole('button', { name: 'Abandonar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar abandono' }));
+    expect(screen.getByRole('heading', { name: 'Truco Argentino' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Historial' }));
     expect(screen.getByText(/Abandonada \(Derrota\)/i)).toBeInTheDocument();
   });

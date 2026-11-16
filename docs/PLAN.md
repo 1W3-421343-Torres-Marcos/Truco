@@ -133,7 +133,7 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 
 - [x] Reglas y tutorial interactivo dentro de la app (`feat(ui): tutorial y reglas`)
 - [x] PWA: manifest, íconos, offline (`feat: pwa instalable`)
-- [ ] Accesibilidad básica, QA manual en celular, corrección de bugs (`fix: ...`)
+- [x] Accesibilidad básica, QA manual en celular, corrección de bugs (`fix: ...`)
 - [ ] Build final y release (`chore: release v1.0.0`). Tag `v1.0.0`.
 
 ## 4. Registro de progreso
@@ -187,3 +187,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 9 · Efectos de sonido con Web Audio API + voz opcional `speechSynthesis` (`sound-effects.ts`) y botón de silencio en mesa; cierre con tag `etapa-9` · `feat(ui): sonido y voz`
 - 2026-11-16 · Etapa 10 · Reglas ilustradas con cartas SVG y tutorial interactivo de 4 lecciones (`RulesScreen.tsx`) · `feat(ui): tutorial y reglas`
 - 2026-11-16 · Etapa 10 · Configuración PWA con `vite-plugin-pwa`, manifiesto `es-AR`, ícono `public/icon.svg` y Service Worker Workbox offline · `feat: pwa instalable`
+- 2026-11-16 · Etapa 10 · Accesibilidad (`:focus-visible`, targets ≥ 44 px) y botón de abandono con confirmación en mesa · `fix(ui): accesibilidad y confirmacion de abandono`

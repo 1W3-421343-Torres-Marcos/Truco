@@ -59,6 +59,12 @@ button {
   font-family: inherit;
 }
 
+button:focus-visible,
+[role='button']:focus-visible {
+  outline: 3px solid var(--celeste);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import {
   BOT_CHARACTERS,
@@ -34,8 +34,10 @@ export function TableScreen() {
   const runBotTurn = useGameStore((s) => s.runBotTurn);
   const advanceToNextHand = useGameStore((s) => s.advanceToNextHand);
   const startNewGame = useGameStore((s) => s.startNewGame);
+  const abandonCurrentGame = useGameStore((s) => s.abandonCurrentGame);
   const updateSettings = useGameStore((s) => s.updateSettings);
   const navigateTo = useGameStore((s) => s.navigateTo);
+  const [confirmingAbandon, setConfirmingAbandon] = useState(false);
 
   const state = savedGame?.state ?? null;
   const activePlayer = state ? getActivePlayer(state.hand) : null;
@@ -125,6 +127,27 @@ export function TableScreen() {
           >
             {settings.soundEnabled ? '🔊 Sonido' : '🔇 Silencio'}
           </button>
+          {state.winner === null && !confirmingAbandon && (
+            <button
+              type="button"
+              className={styles.navButton}
+              onClick={() => setConfirmingAbandon(true)}
+            >
+              Abandonar
+            </button>
+          )}
+          {state.winner === null && confirmingAbandon && (
+            <button
+              type="button"
+              className={styles.dangerButton}
+              onClick={() => {
+                setConfirmingAbandon(false);
+                abandonCurrentGame();
+              }}
+            >
+              Confirmar abandono
+            </button>
+          )}
           <button type="button" className={styles.navButton} onClick={() => navigateTo('home')}>
             Menú
           </button>
