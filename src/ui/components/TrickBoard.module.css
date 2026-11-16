@@ -1,0 +1,72 @@
+.board {
+  width: 100%;
+  max-width: 560px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+}
+
+.trickColumn {
+  background: rgba(43, 29, 14, 0.42);
+  border: 2px solid var(--cuero);
+  border-radius: 10px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.trickColumnActive {
+  border-color: var(--crema);
+  background: rgba(43, 29, 14, 0.58);
+}
+
+.trickHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(244, 234, 213, 0.3);
+  padding-bottom: 0.25rem;
+}
+
+.badge {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background-color: var(--cuero);
+  color: var(--crema);
+}
+
+.slot {
+  background-color: rgba(244, 234, 213, 0.12);
+  border-radius: 8px;
+  padding: 0.4rem;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.slotLabel {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+
+.playedCard {
+  background-color: var(--crema);
+  color: var(--tinta);
+  border: 1px solid var(--madera-oscura);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.emptySlot {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}

@@ -9,6 +9,7 @@ import {
   type Action,
 } from '../../store/index.ts';
 import { ActionBar } from '../components/ActionBar.tsx';
+import { TrickBoard } from '../components/TrickBoard.tsx';
 import styles from './TableScreen.module.css';
 
 function formatStageLabel(score: number, target: 15 | 30): string {
@@ -108,7 +109,11 @@ export function TableScreen() {
       </section>
 
       <section className={styles.centerZone} aria-label="Zona central de la mesa">
-        <p>Baza actual: #{hand.currentTrickIndex + 1}</p>
+        <TrickBoard
+          tricks={hand.tricks}
+          currentTrickIndex={hand.currentTrickIndex}
+          rivalName={character.name}
+        />
       </section>
 
       <section className={styles.myHandSection} aria-label="Tus cartas">
