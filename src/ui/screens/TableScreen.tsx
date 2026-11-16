@@ -9,6 +9,13 @@ import {
   useGameStore,
   type Action,
 } from '../../store/index.ts';
+import {
+  playCallSound,
+  playCardSound,
+  playDealSound,
+  playWinSound,
+  speakBotPhrase,
+} from '../audio/sound-effects.ts';
 import { SpanishCard } from '../cards/SpanishCard.tsx';
 import { ActionBar } from '../components/ActionBar.tsx';
 import { GauchoAvatar } from '../components/GauchoAvatar.tsx';
@@ -22,15 +29,38 @@ export function TableScreen() {
   const savedGame = useGameStore((s) => s.savedGame);
   const botSpeech = useGameStore((s) => s.botSpeech);
   const humanSpeech = useGameStore((s) => s.humanSpeech);
+  const settings = useGameStore((s) => s.settings);
   const playHumanAction = useGameStore((s) => s.playHumanAction);
   const runBotTurn = useGameStore((s) => s.runBotTurn);
   const advanceToNextHand = useGameStore((s) => s.advanceToNextHand);
   const startNewGame = useGameStore((s) => s.startNewGame);
+  const updateSettings = useGameStore((s) => s.updateSettings);
   const navigateTo = useGameStore((s) => s.navigateTo);
 
   const state = savedGame?.state ?? null;
   const activePlayer = state ? getActivePlayer(state.hand) : null;
   const reduceMotion = useReducedMotion();
+  const handNumber = state?.hand.handNumber ?? 0;
+  const handPhase = state?.hand.phase ?? null;
+  const difficulty = savedGame?.difficulty ?? 'medio';
+
+  useEffect(() => {
+    if (handNumber > 0) {
+      playDealSound(settings);
+    }
+  }, [handNumber, settings]);
+
+  useEffect(() => {
+    if (botSpeech) {
+      speakBotPhrase(botSpeech, difficulty, settings);
+    }
+  }, [botSpeech, difficulty, settings]);
+
+  useEffect(() => {
+    if (handPhase === 'handEnded') {
+      playWinSound(settings);
+    }
+  }, [handPhase, settings]);
 
   useEffect(() => {
     if (!state || state.winner !== null || activePlayer !== 'bot') {
@@ -57,6 +87,15 @@ export function TableScreen() {
         a.type === 'playCard' && cardId(a.card) === id,
     );
 
+  const handleHumanAction = (action: Action) => {
+    if (action.type === 'playCard') {
+      playCardSound(settings);
+    } else {
+      playCallSound(settings);
+    }
+    playHumanAction(action);
+  };
+
   return (
     <main className={styles.tablePage} aria-label="Mesa de Truco">
       <header className={styles.topBar}>
@@ -77,9 +116,19 @@ export function TableScreen() {
           rivalName={character.name}
         />
 
-        <button type="button" className={styles.navButton} onClick={() => navigateTo('home')}>
-          Menú
-        </button>
+        <div className={styles.topActions}>
+          <button
+            type="button"
+            className={styles.navButton}
+            aria-label={settings.soundEnabled ? 'Silenciar sonido' : 'Activar sonido'}
+            onClick={() => updateSettings({ soundEnabled: !settings.soundEnabled })}
+          >
+            {settings.soundEnabled ? '🔊 Sonido' : '🔇 Silencio'}
+          </button>
+          <button type="button" className={styles.navButton} onClick={() => navigateTo('home')}>
+            Menú
+          </button>
+        </div>
       </header>
 
       <div className={styles.statusStrip}>
@@ -157,7 +206,7 @@ export function TableScreen() {
                 whileTap={playAction && !reduceMotion ? { scale: 0.94 } : undefined}
                 onClick={() => {
                   if (playAction) {
-                    playHumanAction(playAction);
+                    handleHumanAction(playAction);
                   }
                 }}
               >
@@ -172,7 +221,7 @@ export function TableScreen() {
           rivalName={character.name}
           legalActions={legalActions}
           isHumanTurn={isHumanTurn}
-          onAction={playHumanAction}
+          onAction={handleHumanAction}
         />
       </section>
     </main>

@@ -156,6 +156,12 @@
   text-align: center;
 }
 
+.topActions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
 .navButton {
   min-height: 44px;
   padding: 0.35rem 0.65rem;

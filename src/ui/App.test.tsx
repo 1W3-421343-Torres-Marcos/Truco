@@ -54,10 +54,16 @@ describe('App — Flujo completo de UI funcional (Etapa 7)', () => {
     expect(screen.getByLabelText('Baza 2')).toBeInTheDocument();
     expect(screen.getByLabelText('Baza 3')).toBeInTheDocument();
 
-    // Irse al mazo en la 1ª mano -> aparece el modal de Resumen de la mano
+    // Irse al mazo en la 1ª mano -> aparece el modal de Resumen de la mano y el globo de diálogo
     fireEvent.click(screen.getByRole('button', { name: 'Irse al mazo' }));
     expect(screen.getByRole('dialog', { name: 'Resumen de la mano' })).toBeInTheDocument();
     expect(screen.getByText(/Te fuiste al mazo/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('Dicho de Vos')).toHaveTextContent('Me voy al mazo');
+
+    // Probar botón de silencio en la mesa
+    const muteBtn = screen.getByRole('button', { name: 'Silenciar sonido' });
+    fireEvent.click(muteBtn);
+    expect(screen.getByRole('button', { name: 'Activar sonido' })).toBeInTheDocument();
 
     // Pasar a la siguiente mano
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente mano' }));

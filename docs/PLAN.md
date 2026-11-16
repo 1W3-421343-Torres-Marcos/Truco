@@ -122,11 +122,11 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - [x] Responsive móvil vertical primero (`style(ui): responsive`)
 - Tag `etapa-8`. **Punto de control con el usuario: aprobación visual.**
 
-### Etapa 9 — Animaciones, sonido y frases
+### Etapa 9 — Animaciones, sonido y frases ✅
 
 - [x] Animación de reparto y de jugar carta (`feat(ui): animaciones`)
 - [x] Globos de diálogo con frases por personaje (`feat(ui): globos de dialogo`)
-- [ ] Efectos de sonido + voz TTS opcional + botón silencio (`feat(ui): sonido y voz`)
+- [x] Efectos de sonido + voz TTS opcional + botón silencio (`feat(ui): sonido y voz`)
 - Tag `etapa-9`.
 
 ### Etapa 10 — Tutorial, PWA y cierre
@@ -184,3 +184,4 @@ Leyenda: `[ ]` pendiente · `[~]` en curso · `[x]` hecha. Commit sugerido entre
 - 2026-11-16 · Etapa 8 · Ajustes responsive móvil vertical primero (360×640) y tests de componentes visuales; cierre con tag `etapa-8` · `style(ui): responsive`
 - 2026-11-16 · Etapa 9 · Animaciones con `motion` (reparto escalonado 80 ms, vuelo de carta a baza, volteo final de cartas del bot y fósforo nuevo) con soporte `prefers-reduced-motion` · `feat(ui): animaciones`
 - 2026-11-16 · Etapa 9 · Componente `<SpeechBubble />` animado para frases del personaje y cantos del jugador · `feat(ui): globos de dialogo`
+- 2026-11-16 · Etapa 9 · Efectos de sonido con Web Audio API + voz opcional `speechSynthesis` (`sound-effects.ts`) y botón de silencio en mesa; cierre con tag `etapa-9` · `feat(ui): sonido y voz`
